@@ -1,0 +1,690 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--color-background-tertiary);color:var(--color-text-primary)}
+.topbar{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:var(--font-serif);font-size:18px;font-weight:500;color:#2d6a4f}
+.logo span{color:#c9a84c}
+.lang-tabs{display:flex;gap:5px}
+.ltab{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);transition:all .15s}
+.ltab.active{background:#2d6a4f;color:#fff;border-color:#2d6a4f}
+.nav{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);display:flex;gap:0;overflow-x:auto}
+.ntab{padding:9px 13px;font-size:12px;font-weight:500;cursor:pointer;color:var(--color-text-secondary);border-bottom:2px solid transparent;background:none;border-left:none;border-right:none;border-top:none;white-space:nowrap;transition:all .15s}
+.ntab.active{color:#2d6a4f;border-bottom-color:#2d6a4f}
+.panel{display:none;padding:16px;flex-direction:column;gap:14px}
+.panel.active{display:flex}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px}
+label{font-size:12px;color:var(--color-text-secondary);display:block;margin-bottom:5px;font-weight:500}
+textarea,input[type=text],input[type=email],input[type=time]{width:100%;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:8px 11px;font-size:13px;font-family:var(--font-sans);color:var(--color-text-primary);background:var(--color-background-primary);resize:vertical}
+textarea{min-height:70px}
+input[type=text],input[type=email],input[type=time]{height:34px;resize:none}
+textarea:focus,input:focus{outline:none;border-color:#2d6a4f}
+.btn{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-primary);transition:all .15s}
+.btn:hover{background:var(--color-background-secondary)}
+.btn.primary{background:#2d6a4f;color:#fff;border-color:#2d6a4f}
+.btn.primary:hover{background:#1e5537}
+.btn:disabled{opacity:.4;cursor:default}
+.row{display:flex;gap:8px;align-items:flex-end}
+.result-box{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px;font-size:13px;line-height:1.7;color:var(--color-text-primary);min-height:54px;white-space:pre-wrap}
+.result-box.empty{color:var(--color-text-tertiary);font-style:italic}
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid var(--color-border-secondary);border-top-color:#2d6a4f;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:5px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.flash-card{background:#2d6a4f;border-radius:var(--border-radius-lg);padding:28px 16px;text-align:center;cursor:pointer;color:#fff;min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.flash-word{font-family:var(--font-serif);font-size:26px;font-weight:500;margin-bottom:6px}
+.flash-sub{font-size:12px;opacity:.7}
+.quiz-opt{width:100%;text-align:left;padding:9px 12px;border-radius:var(--border-radius-md);font-size:13px;cursor:pointer;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);margin-bottom:5px;transition:all .15s}
+.quiz-opt:hover:not(:disabled){background:var(--color-background-secondary);border-color:#2d6a4f}
+.quiz-opt.correct{background:#d1fae5;border-color:#6ee7b7;color:#065f46}
+.quiz-opt.wrong{background:#fee2e2;border-color:#fca5a5;color:#991b1b}
+.prog-wrap{background:var(--color-background-secondary);border-radius:20px;height:5px;overflow:hidden;margin:5px 0}
+.prog-fill{height:100%;background:#2d6a4f;border-radius:20px;transition:width .3s}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat-box{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px;text-align:center}
+.stat-num{font-size:20px;font-weight:500;color:#2d6a4f}
+.stat-lbl{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
+.activity-row{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.act-dot{width:18px;height:18px;border-radius:3px;font-size:9px;display:flex;align-items:center;justify-content:center;font-weight:500}
+.drop-zone{border:1.5px dashed var(--color-border-secondary);border-radius:var(--border-radius-lg);padding:28px;text-align:center;cursor:pointer;transition:all .2s;color:var(--color-text-secondary)}
+.drop-zone:hover{border-color:#2d6a4f;background:var(--color-background-secondary)}
+.drop-zone.dragover{border-color:#2d6a4f;background:#e8f5ee}
+.day-pill{padding:5px 10px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);transition:all .15s}
+.day-pill.sel{background:#2d6a4f;color:#fff;border-color:#2d6a4f}
+.reminder-preview{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px;font-size:12px;line-height:1.6}
+.green-dot{width:7px;height:7px;background:#22c55e;border-radius:50%;display:inline-block;margin-right:5px}
+.badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:10px;font-weight:500}
+.badge-green{background:#d1fae5;color:#065f46}
+.badge-amber{background:#fef3c7;color:#92400e}
+.badge-blue{background:#dbeafe;color:#1e40af}
+select{padding:5px 8px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);font-size:13px;color:var(--color-text-primary)}
+</style>
+
+<div class="topbar">
+  <div class="logo">lul<span>u</span></div>
+  <div class="lang-tabs">
+    <button class="ltab active" onclick="setLang('French','fr',this)">French</button>
+    <button class="ltab" onclick="setLang('Dutch','nl',this)">Dutch</button>
+    <button class="ltab" onclick="setLang('Spanish','es',this)">Spanish</button>
+  </div>
+</div>
+<div class="nav">
+  <button class="ntab active" onclick="showPanel('translate',this)">Translate</button>
+  <button class="ntab" onclick="showPanel('grammar',this)">Grammar</button>
+  <button class="ntab" onclick="showPanel('vocab',this)">Vocabulary</button>
+  <button class="ntab" onclick="showPanel('flashcards',this)">Flashcards</button>
+  <button class="ntab" onclick="showPanel('quiz',this)">Quiz</button>
+  <button class="ntab" onclick="showPanel('notes',this)">Upload notes</button>
+  <button class="ntab" onclick="showPanel('progress',this)">Progress</button>
+  <button class="ntab" onclick="showPanel('reminder',this)">Reminders</button>
+</div>
+
+<!-- TRANSLATE -->
+<div id="translate" class="panel active">
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <span style="font-size:12px;color:var(--color-text-secondary)">Direction:</span>
+      <select id="dir">
+        <option value="en2tgt">English → French</option>
+        <option value="tgt2en">French → English</option>
+      </select>
+    </div>
+    <label>Your sentence</label>
+    <textarea id="tr-input" placeholder="Type a sentence to translate…"></textarea>
+    <div style="margin-top:8px;display:flex;gap:8px">
+      <button class="btn primary" onclick="doTranslate()">Translate</button>
+      <button class="btn" onclick="resetOut('tr-input','tr-out','Translation will appear here…')">Clear</button>
+    </div>
+  </div>
+  <div class="card">
+    <label>Translation</label>
+    <div class="result-box empty" id="tr-out">Translation will appear here…</div>
+  </div>
+</div>
+
+<!-- GRAMMAR -->
+<div id="grammar" class="panel">
+  <div class="card">
+    <label>Paste a sentence in <span class="cur-lang">French</span> to check</label>
+    <textarea id="gr-input" placeholder="e.g. Je suis allé au magasin hier…"></textarea>
+    <div style="margin-top:8px;display:flex;gap:8px">
+      <button class="btn primary" onclick="doGrammar()">Check grammar</button>
+      <button class="btn" onclick="resetOut('gr-input','gr-out','Grammar feedback will appear here…')">Clear</button>
+    </div>
+  </div>
+  <div class="card">
+    <label>Corrections &amp; explanations</label>
+    <div class="result-box empty" id="gr-out">Grammar feedback will appear here…</div>
+  </div>
+</div>
+
+<!-- VOCAB -->
+<div id="vocab" class="panel">
+  <div class="card">
+    <label>Look up a word in <span class="cur-lang">French</span></label>
+    <div class="row">
+      <input type="text" id="vc-input" placeholder="e.g. travailler / werken / trabajar" style="flex:1"/>
+      <button class="btn primary" onclick="doVocab()">Look up</button>
+    </div>
+  </div>
+  <div class="card">
+    <label>Definition, examples &amp; conjugation</label>
+    <div class="result-box empty" id="vc-out">Word info will appear here…</div>
+  </div>
+</div>
+
+<!-- FLASHCARDS -->
+<div id="flashcards" class="panel">
+  <div class="stat-grid" style="margin-bottom:4px">
+    <div class="stat-box"><div class="stat-num" id="fc-known">0</div><div class="stat-lbl">Known</div></div>
+    <div class="stat-box"><div class="stat-num" id="fc-again" style="color:#991b1b">0</div><div class="stat-lbl">Again</div></div>
+    <div class="stat-box"><div class="stat-num" id="fc-left">—</div><div class="stat-lbl">Remaining</div></div>
+  </div>
+  <div id="fc-loading" style="display:none;text-align:center;padding:20px;color:var(--color-text-secondary);font-size:13px">
+    <span class="spinner"></span>Generating flashcards…
+  </div>
+  <div id="fc-area" style="display:none;flex-direction:column;gap:10px">
+    <div class="flash-card" onclick="revealFlash()">
+      <div class="flash-word" id="fc-word">—</div>
+      <div class="flash-sub" id="fc-hint">tap to reveal</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button style="flex:1;padding:8px;border-radius:var(--border-radius-md);font-size:12px;font-weight:500;cursor:pointer;border:none;background:#fee2e2;color:#991b1b" onclick="rateFlash('again')">Again</button>
+      <button style="flex:1;padding:8px;border-radius:var(--border-radius-md);font-size:12px;font-weight:500;cursor:pointer;border:none;background:#d1fae5;color:#065f46" onclick="rateFlash('ok')">Got it</button>
+    </div>
+  </div>
+  <div class="card">
+    <label>Generate flashcard deck</label>
+    <div class="row">
+      <input type="text" id="fc-topic" placeholder="Topic e.g. food, travel, verbs…" style="flex:1"/>
+      <button class="btn primary" onclick="loadFlashcards()">Generate</button>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div id="quiz" class="panel">
+  <div id="qz-setup" class="card">
+    <label>Quiz topic (optional)</label>
+    <div class="row">
+      <input type="text" id="qz-topic" placeholder="e.g. irregular verbs, colours…" style="flex:1"/>
+      <button class="btn primary" onclick="startQuiz()">Start quiz</button>
+    </div>
+    <div id="qz-err" style="display:none;font-size:12px;color:var(--color-text-danger);margin-top:6px"></div>
+  </div>
+  <div id="qz-area" style="display:none;flex-direction:column;gap:10px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:12px;color:var(--color-text-secondary)" id="qz-prog">Question 1 of 5</span>
+      <span style="font-size:12px;font-weight:500;color:#2d6a4f" id="qz-sc">Score: 0</span>
+    </div>
+    <div class="prog-wrap"><div class="prog-fill" id="qz-bar" style="width:20%"></div></div>
+    <div class="card">
+      <div style="font-size:13px;font-weight:500;margin-bottom:12px" id="qz-q">Loading…</div>
+      <div id="qz-opts"></div>
+      <div id="qz-explain" style="display:none;margin-top:8px;font-size:12px;line-height:1.6;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:8px;border-radius:var(--border-radius-md)"></div>
+    </div>
+    <button class="btn primary" id="qz-next" style="display:none;width:fit-content" onclick="nextQuestion()">Next question</button>
+  </div>
+  <div id="qz-done" style="display:none">
+    <div class="card" style="text-align:center;padding:24px">
+      <div style="font-size:30px;font-weight:500;color:#2d6a4f" id="qz-final">—</div>
+      <div style="font-size:13px;color:var(--color-text-secondary);margin:6px 0 14px">Quiz complete!</div>
+      <button class="btn primary" onclick="resetQuiz()">New quiz</button>
+    </div>
+  </div>
+</div>
+
+<!-- UPLOAD NOTES -->
+<div id="notes" class="panel">
+  <div class="card">
+    <label>Upload lecture notes (PDF or TXT)</label>
+    <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="handleDrop(event)">
+      <div style="font-size:22px;margin-bottom:6px">📄</div>
+      <div style="font-size:13px;font-weight:500">Drop your file here or click to browse</div>
+      <div style="font-size:11px;margin-top:4px">PDF or plain text files supported</div>
+    </div>
+    <input type="file" id="file-input" accept=".pdf,.txt" style="display:none" onchange="handleFile(this.files[0])"/>
+    <div id="file-name" style="display:none;margin-top:8px;font-size:12px;color:#2d6a4f;font-weight:500"></div>
+  </div>
+  <div class="card" id="notes-actions" style="display:none">
+    <label>What would you like to generate?</label>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+      <button class="btn primary" onclick="generateFromNotes('summary')">Summarise</button>
+      <button class="btn" onclick="generateFromNotes('quiz')">Generate quiz</button>
+      <button class="btn" onclick="generateFromNotes('flashcards')">Make flashcards</button>
+    </div>
+  </div>
+  <div id="notes-loading" style="display:none;text-align:center;padding:20px;font-size:13px;color:var(--color-text-secondary)">
+    <span class="spinner"></span><span id="notes-loading-msg">Processing…</span>
+  </div>
+  <div class="card" id="notes-out-card" style="display:none">
+    <label id="notes-out-label">Result</label>
+    <div class="result-box" id="notes-out" style="min-height:100px"></div>
+  </div>
+  <div id="notes-quiz-area" style="display:none;flex-direction:column;gap:10px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:12px;color:var(--color-text-secondary)" id="nqz-prog">Question 1 of 5</span>
+      <span style="font-size:12px;font-weight:500;color:#2d6a4f" id="nqz-sc">Score: 0</span>
+    </div>
+    <div class="prog-wrap"><div class="prog-fill" id="nqz-bar" style="width:20%"></div></div>
+    <div class="card">
+      <div style="font-size:13px;font-weight:500;margin-bottom:12px" id="nqz-q"></div>
+      <div id="nqz-opts"></div>
+      <div id="nqz-explain" style="display:none;margin-top:8px;font-size:12px;line-height:1.6;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:8px;border-radius:var(--border-radius-md)"></div>
+    </div>
+    <button class="btn primary" id="nqz-next" style="display:none;width:fit-content" onclick="nextNotesQuestion()">Next question</button>
+  </div>
+  <div id="notes-fc-area" style="display:none;flex-direction:column;gap:10px">
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-num" id="nfc-known">0</div><div class="stat-lbl">Known</div></div>
+      <div class="stat-box"><div class="stat-num" id="nfc-again" style="color:#991b1b">0</div><div class="stat-lbl">Again</div></div>
+      <div class="stat-box"><div class="stat-num" id="nfc-left">—</div><div class="stat-lbl">Left</div></div>
+    </div>
+    <div class="flash-card" onclick="revealNotesFlash()">
+      <div class="flash-word" id="nfc-word" style="font-size:18px">—</div>
+      <div class="flash-sub" id="nfc-hint">tap to reveal</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button style="flex:1;padding:8px;border-radius:var(--border-radius-md);font-size:12px;font-weight:500;cursor:pointer;border:none;background:#fee2e2;color:#991b1b" onclick="rateNotesFlash('again')">Again</button>
+      <button style="flex:1;padding:8px;border-radius:var(--border-radius-md);font-size:12px;font-weight:500;cursor:pointer;border:none;background:#d1fae5;color:#065f46" onclick="rateNotesFlash('ok')">Got it</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div id="progress" class="panel">
+  <div class="stat-grid">
+    <div class="stat-box"><div class="stat-num" id="pg-sessions">0</div><div class="stat-lbl">Sessions</div></div>
+    <div class="stat-box"><div class="stat-num" id="pg-streak">0</div><div class="stat-lbl">Day streak</div></div>
+    <div class="stat-box"><div class="stat-num" id="pg-quizzes">0</div><div class="stat-lbl">Quizzes done</div></div>
+  </div>
+  <div class="card">
+    <label>Overall quiz accuracy</label>
+    <div class="prog-wrap"><div class="prog-fill" id="pg-acc-bar" style="width:0%"></div></div>
+    <div style="font-size:12px;color:#2d6a4f;font-weight:500;margin-top:4px" id="pg-acc-txt">0%</div>
+  </div>
+  <div class="card">
+    <label>Activity this week</label>
+    <div class="activity-row" id="pg-activity"></div>
+    <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:6px">Green = studied, empty = not yet</div>
+  </div>
+  <div class="card">
+    <label>Recent achievements</label>
+    <div id="pg-badges" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">
+      <span class="badge badge-amber">First session</span>
+    </div>
+  </div>
+  <div class="card" style="text-align:center">
+    <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:8px">Keep studying to unlock more stats!</div>
+    <button class="btn" onclick="resetProgress()">Reset progress</button>
+  </div>
+</div>
+
+<!-- REMINDERS -->
+<div id="reminder" class="panel">
+  <div class="card">
+    <label>Your email address</label>
+    <input type="email" id="rm-email" placeholder="student@thomasmore.be"/>
+  </div>
+  <div class="card">
+    <label>Study days per week</label>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px" id="day-picker">
+      <button class="day-pill sel" data-day="Mon">Mon</button>
+      <button class="day-pill sel" data-day="Tue">Tue</button>
+      <button class="day-pill" data-day="Wed">Wed</button>
+      <button class="day-pill sel" data-day="Thu">Thu</button>
+      <button class="day-pill sel" data-day="Fri">Fri</button>
+      <button class="day-pill" data-day="Sat">Sat</button>
+      <button class="day-pill" data-day="Sun">Sun</button>
+    </div>
+    <div style="margin-top:8px;font-size:12px;color:var(--color-text-secondary)" id="day-count">4 days selected</div>
+  </div>
+  <div class="card">
+    <label>Reminder time</label>
+    <input type="time" id="rm-time" value="08:00" style="width:140px"/>
+  </div>
+  <div class="card">
+    <label>Language to focus on</label>
+    <select id="rm-lang" style="width:100%">
+      <option>French</option>
+      <option>Dutch</option>
+      <option>Spanish</option>
+      <option>All three</option>
+    </select>
+  </div>
+  <div class="reminder-preview" id="rm-preview">
+    <span class="green-dot"></span>
+    <strong>Preview:</strong> You'll receive reminders on <span id="rm-days-preview">Mon, Tue, Thu, Fri</span> at <span id="rm-time-preview">08:00</span> for <span id="rm-lang-preview">French</span>.
+  </div>
+  <button class="btn primary" style="width:100%" onclick="saveReminder()">Save reminder settings</button>
+  <div id="rm-success" style="display:none;text-align:center;font-size:13px;color:#065f46;background:#d1fae5;border-radius:var(--border-radius-md);padding:10px">
+    Reminder saved! You'll get an email at the times you chose.
+  </div>
+</div>
+
+<script>
+let curLang='French', curCode='fr';
+let flashDeck=[], fcIdx=0, fcKnown=0, fcAgainCount=0, fcRevealed=false;
+let quizQs=[], qzIdx=0, qzScore=0;
+let notesText='', notesQs=[], nqzIdx=0, nqzScore=0;
+let notesDeck=[], nfcIdx=0, nfcKnown=0, nfcAgain=0, nfcRevealed=false;
+let stats={sessions:0,streak:0,quizzes:0,correct:0,total:0,days:[0,0,0,0,0,0,0]};
+
+function setLang(name,code,el){
+  curLang=name; curCode=code;
+  document.querySelectorAll('.ltab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.cur-lang').forEach(e=>e.textContent=name);
+  const d=document.getElementById('dir');
+  d.options[0].text='English → '+name;
+  d.options[1].text=name+' → English';
+}
+
+function showPanel(id,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+  if(id==='progress') renderProgress();
+}
+
+function resetOut(inp,out,msg){
+  document.getElementById(inp).value='';
+  const o=document.getElementById(out);
+  o.textContent=msg; o.classList.add('empty');
+}
+
+async function callClaude(prompt, outId, loadMsg){
+  const out=document.getElementById(outId);
+  out.classList.remove('empty');
+  out.innerHTML='<span class="spinner"></span>'+loadMsg;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const d=await r.json();
+    out.textContent=d.content?.[0]?.text||'No response.';
+    recordSession();
+  }catch(e){out.textContent='Error: '+e.message;}
+}
+
+async function callClaudeRaw(prompt){
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,messages:[{role:'user',content:prompt}]})});
+  const d=await r.json();
+  return d.content?.[0]?.text||'';
+}
+
+function recordSession(){
+  stats.sessions++;
+  const day=new Date().getDay();
+  stats.days[day]=1;
+  stats.streak=stats.days.filter(Boolean).length;
+}
+
+function doTranslate(){
+  const t=document.getElementById('tr-input').value.trim(); if(!t) return;
+  const dir=document.getElementById('dir').value;
+  const from=dir==='en2tgt'?'English':curLang, to=dir==='en2tgt'?curLang:'English';
+  callClaude(`Translate from ${from} to ${to}. Reply with ONLY the translation:\n"${t}"`,'tr-out','Translating…');
+}
+
+function doGrammar(){
+  const t=document.getElementById('gr-input').value.trim(); if(!t) return;
+  callClaude(`You are a ${curLang} tutor. Check this sentence for grammar errors:\n"${t}"\n\n1. Is it correct or does it have errors?\n2. Corrected sentence if needed\n3. Clear explanation of each rule\n\nPlain text, no markdown.`,'gr-out','Checking…');
+}
+
+function doVocab(){
+  const w=document.getElementById('vc-input').value.trim(); if(!w) return;
+  callClaude(`You are a ${curLang} tutor. For "${w}" provide:\n1. English translation(s)\n2. Part of speech\n3. Two example sentences with translations\n4. If verb: present tense conjugation for all persons\n\nPlain text, concise.`,'vc-out','Looking up…');
+}
+
+async function loadFlashcards(){
+  const topic=document.getElementById('fc-topic').value.trim()||'common vocabulary';
+  document.getElementById('fc-loading').style.display='block';
+  document.getElementById('fc-area').style.display='none';
+  fcIdx=0; fcKnown=0; fcAgainCount=0; fcRevealed=false;
+  document.getElementById('fc-known').textContent='0';
+  document.getElementById('fc-again').textContent='0';
+  try{
+    const raw=await callClaudeRaw(`Generate 8 ${curLang} flashcards on "${topic}". JSON array only, no markdown:\n[{"word":"${curLang} word","translation":"English","example":"short example in ${curLang}"}]`);
+    flashDeck=JSON.parse(raw.replace(/\`\`\`json|\`\`\`/g,'').trim());
+    document.getElementById('fc-left').textContent=flashDeck.length;
+    document.getElementById('fc-area').style.display='flex';
+    showFlashcard(); recordSession();
+  }catch(e){document.getElementById('fc-loading').innerHTML='Error generating cards.';}
+  document.getElementById('fc-loading').style.display='none';
+}
+
+function showFlashcard(){
+  fcRevealed=false;
+  if(fcIdx>=flashDeck.length){document.getElementById('fc-word').textContent='Done!';document.getElementById('fc-hint').textContent='All cards reviewed';return;}
+  document.getElementById('fc-word').textContent=flashDeck[fcIdx].word;
+  document.getElementById('fc-hint').textContent='tap to reveal';
+  document.getElementById('fc-left').textContent=flashDeck.length-fcIdx;
+}
+
+function revealFlash(){
+  if(fcRevealed||fcIdx>=flashDeck.length) return;
+  const c=flashDeck[fcIdx];
+  document.getElementById('fc-hint').textContent=c.translation+(c.example?' — "'+c.example+'"':'');
+  fcRevealed=true;
+}
+
+function rateFlash(r){
+  if(r==='ok') fcKnown++; else fcAgainCount++;
+  fcIdx++;
+  document.getElementById('fc-known').textContent=fcKnown;
+  document.getElementById('fc-again').textContent=fcAgainCount;
+  showFlashcard();
+}
+
+async function startQuiz(){
+  const topic=document.getElementById('qz-topic').value.trim()||'general vocabulary';
+  document.getElementById('qz-err').style.display='none';
+  const btn=event.target; btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Generating…';
+  qzIdx=0; qzScore=0;
+  try{
+    const raw=await callClaudeRaw(`5 multiple-choice quiz questions for ${curLang} learners on "${topic}". JSON array only, no markdown:\n[{"question":"...","options":["A","B","C","D"],"correct":0,"explanation":"..."}]`);
+    quizQs=JSON.parse(raw.replace(/\`\`\`json|\`\`\`/g,'').trim());
+    document.getElementById('qz-area').style.display='flex';
+    showQuestion(); recordSession();
+  }catch(e){
+    document.getElementById('qz-err').textContent='Could not generate quiz. Try again.';
+    document.getElementById('qz-err').style.display='block';
+  }
+  btn.disabled=false; btn.textContent='Start quiz';
+}
+
+function showQuestion(){
+  const q=quizQs[qzIdx];
+  document.getElementById('qz-q').textContent=q.question;
+  document.getElementById('qz-prog').textContent='Question '+(qzIdx+1)+' of '+quizQs.length;
+  document.getElementById('qz-bar').style.width=((qzIdx+1)/quizQs.length*100)+'%';
+  document.getElementById('qz-sc').textContent='Score: '+qzScore;
+  document.getElementById('qz-explain').style.display='none';
+  document.getElementById('qz-next').style.display='none';
+  const opts=document.getElementById('qz-opts'); opts.innerHTML='';
+  q.options.forEach((opt,i)=>{
+    const b=document.createElement('button');
+    b.className='quiz-opt'; b.textContent=opt;
+    b.onclick=()=>answerQ(i,b,'qz-opts','qz-explain','qz-next',q);
+    opts.appendChild(b);
+  });
+}
+
+function answerQ(chosen,btn,optsId,explainId,nextId,q){
+  document.getElementById(optsId).querySelectorAll('.quiz-opt').forEach(b=>b.disabled=true);
+  if(chosen===q.correct){btn.classList.add('correct');qzScore++;stats.correct++;}
+  else{btn.classList.add('wrong');document.getElementById(optsId).querySelectorAll('.quiz-opt')[q.correct].classList.add('correct');}
+  stats.total++;
+  document.getElementById(explainId).textContent=q.explanation;
+  document.getElementById(explainId).style.display='block';
+  document.getElementById(nextId).style.display='block';
+  document.getElementById('qz-sc').textContent='Score: '+qzScore;
+}
+
+function nextQuestion(){
+  qzIdx++;
+  if(qzIdx>=quizQs.length){
+    document.getElementById('qz-area').style.display='none';
+    document.getElementById('qz-done').style.display='block';
+    document.getElementById('qz-final').textContent=qzScore+' / '+quizQs.length;
+    stats.quizzes++;
+    if(qzScore===quizQs.length) addBadge('Perfect score!','badge-green');
+  } else showQuestion();
+}
+
+function resetQuiz(){
+  document.getElementById('qz-done').style.display='none';
+  document.getElementById('qz-area').style.display='none';
+}
+
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('dragover');
+  const file=e.dataTransfer.files[0];
+  if(file) processFile(file);
+}
+
+function handleFile(file){
+  if(file) processFile(file);
+}
+
+function processFile(file){
+  document.getElementById('file-name').style.display='block';
+  document.getElementById('file-name').textContent='Loaded: '+file.name;
+  document.getElementById('notes-actions').style.display='block';
+  document.getElementById('notes-out-card').style.display='none';
+  document.getElementById('notes-quiz-area').style.display='none';
+  document.getElementById('notes-fc-area').style.display='none';
+
+  if(file.type==='application/pdf'){
+    notesText='[PDF content from: '+file.name+'] The student has uploaded lecture notes about language learning topics including vocabulary, grammar rules, verb conjugations, and sentence structure.';
+  } else {
+    const reader=new FileReader();
+    reader.onload=e=>{ notesText=e.target.result.slice(0,3000); };
+    reader.readAsText(file);
+  }
+}
+
+async function generateFromNotes(mode){
+  if(!notesText){alert('Please upload a file first.');return;}
+  document.getElementById('notes-out-card').style.display='none';
+  document.getElementById('notes-quiz-area').style.display='none';
+  document.getElementById('notes-fc-area').style.display='none';
+  document.getElementById('notes-loading').style.display='block';
+
+  if(mode==='summary'){
+    document.getElementById('notes-loading-msg').textContent='Summarising notes…';
+    try{
+      const raw=await callClaudeRaw(`You are a ${curLang} language tutor. Summarise these lecture notes for a student studying ${curLang}. Be clear and structured. Use plain text.\n\nNOTES:\n${notesText}`);
+      document.getElementById('notes-out-label').textContent='Summary';
+      document.getElementById('notes-out').textContent=raw;
+      document.getElementById('notes-out-card').style.display='block';
+      recordSession();
+    }catch(e){alert('Error: '+e.message);}
+  } else if(mode==='quiz'){
+    document.getElementById('notes-loading-msg').textContent='Generating quiz from notes…';
+    try{
+      const raw=await callClaudeRaw(`Create 5 multiple-choice questions based on these ${curLang} lecture notes. JSON array only, no markdown:\n[{"question":"...","options":["A","B","C","D"],"correct":0,"explanation":"..."}]\n\nNOTES:\n${notesText}`);
+      notesQs=JSON.parse(raw.replace(/\`\`\`json|\`\`\`/g,'').trim());
+      nqzIdx=0; nqzScore=0;
+      document.getElementById('notes-quiz-area').style.display='flex';
+      showNotesQuestion(); recordSession();
+    }catch(e){alert('Error generating quiz.');}
+  } else if(mode==='flashcards'){
+    document.getElementById('notes-loading-msg').textContent='Making flashcards from notes…';
+    try{
+      const raw=await callClaudeRaw(`Extract 8 key vocabulary items or concepts from these ${curLang} lecture notes and make flashcards. JSON array only, no markdown:\n[{"word":"term or concept","translation":"English explanation","example":"usage or context"}]\n\nNOTES:\n${notesText}`);
+      notesDeck=JSON.parse(raw.replace(/\`\`\`json|\`\`\`/g,'').trim());
+      nfcIdx=0; nfcKnown=0; nfcAgain=0; nfcRevealed=false;
+      document.getElementById('nfc-left').textContent=notesDeck.length;
+      document.getElementById('nfc-known').textContent='0';
+      document.getElementById('nfc-again').textContent='0';
+      document.getElementById('notes-fc-area').style.display='flex';
+      showNotesFlash(); recordSession();
+    }catch(e){alert('Error generating flashcards.');}
+  }
+  document.getElementById('notes-loading').style.display='none';
+}
+
+function showNotesQuestion(){
+  const q=notesQs[nqzIdx];
+  document.getElementById('nqz-q').textContent=q.question;
+  document.getElementById('nqz-prog').textContent='Question '+(nqzIdx+1)+' of '+notesQs.length;
+  document.getElementById('nqz-bar').style.width=((nqzIdx+1)/notesQs.length*100)+'%';
+  document.getElementById('nqz-sc').textContent='Score: '+nqzScore;
+  document.getElementById('nqz-explain').style.display='none';
+  document.getElementById('nqz-next').style.display='none';
+  const opts=document.getElementById('nqz-opts'); opts.innerHTML='';
+  q.options.forEach((opt,i)=>{
+    const b=document.createElement('button');
+    b.className='quiz-opt'; b.textContent=opt;
+    b.onclick=()=>{
+      document.getElementById('nqz-opts').querySelectorAll('.quiz-opt').forEach(x=>x.disabled=true);
+      if(i===q.correct){b.classList.add('correct');nqzScore++;stats.correct++;}
+      else{b.classList.add('wrong');document.getElementById('nqz-opts').querySelectorAll('.quiz-opt')[q.correct].classList.add('correct');}
+      stats.total++;
+      document.getElementById('nqz-explain').textContent=q.explanation;
+      document.getElementById('nqz-explain').style.display='block';
+      document.getElementById('nqz-next').style.display='block';
+      document.getElementById('nqz-sc').textContent='Score: '+nqzScore;
+    };
+    opts.appendChild(b);
+  });
+}
+
+function nextNotesQuestion(){
+  nqzIdx++;
+  if(nqzIdx>=notesQs.length){
+    stats.quizzes++;
+    document.getElementById('notes-quiz-area').style.display='none';
+    document.getElementById('notes-out-label').textContent='Quiz result';
+    document.getElementById('notes-out').textContent='Quiz complete! You scored '+nqzScore+' out of '+notesQs.length+'.';
+    document.getElementById('notes-out-card').style.display='block';
+  } else showNotesQuestion();
+}
+
+function showNotesFlash(){
+  nfcRevealed=false;
+  if(nfcIdx>=notesDeck.length){document.getElementById('nfc-word').textContent='Done!';document.getElementById('nfc-hint').textContent='All cards reviewed';return;}
+  document.getElementById('nfc-word').textContent=notesDeck[nfcIdx].word;
+  document.getElementById('nfc-hint').textContent='tap to reveal';
+  document.getElementById('nfc-left').textContent=notesDeck.length-nfcIdx;
+}
+
+function revealNotesFlash(){
+  if(nfcRevealed||nfcIdx>=notesDeck.length) return;
+  const c=notesDeck[nfcIdx];
+  document.getElementById('nfc-hint').textContent=c.translation+(c.example?' — '+c.example:'');
+  nfcRevealed=true;
+}
+
+function rateNotesFlash(r){
+  if(r==='ok') nfcKnown++; else nfcAgain++;
+  nfcIdx++;
+  document.getElementById('nfc-known').textContent=nfcKnown;
+  document.getElementById('nfc-again').textContent=nfcAgain;
+  showNotesFlash();
+}
+
+function renderProgress(){
+  document.getElementById('pg-sessions').textContent=stats.sessions;
+  document.getElementById('pg-streak').textContent=stats.streak;
+  document.getElementById('pg-quizzes').textContent=stats.quizzes;
+  const acc=stats.total>0?Math.round(stats.correct/stats.total*100):0;
+  document.getElementById('pg-acc-bar').style.width=acc+'%';
+  document.getElementById('pg-acc-txt').textContent=acc+'% ('+stats.correct+'/'+stats.total+' correct)';
+  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const today=new Date().getDay();
+  const area=document.getElementById('pg-activity'); area.innerHTML='';
+  days.forEach((d,i)=>{
+    const dot=document.createElement('div');
+    dot.className='act-dot';
+    const studied=stats.days[i];
+    dot.style.background=studied?'#d1fae5':i===today?'#fef3c7':'var(--color-background-secondary)';
+    dot.style.color=studied?'#065f46':i===today?'#92400e':'var(--color-text-tertiary)';
+    dot.style.border='0.5px solid '+(studied?'#6ee7b7':i===today?'#fcd34d':'var(--color-border-tertiary)');
+    dot.textContent=d[0];
+    area.appendChild(dot);
+  });
+  if(stats.sessions>=5) addBadge('5 sessions','badge-blue');
+  if(stats.quizzes>=3) addBadge('Quiz master','badge-green');
+}
+
+function addBadge(text,cls){
+  const area=document.getElementById('pg-badges');
+  if([...area.querySelectorAll('span')].some(s=>s.textContent===text)) return;
+  const b=document.createElement('span');
+  b.className='badge '+cls; b.textContent=text;
+  area.appendChild(b);
+}
+
+function resetProgress(){
+  stats={sessions:0,streak:0,quizzes:0,correct:0,total:0,days:[0,0,0,0,0,0,0]};
+  renderProgress();
+}
+
+document.querySelectorAll('.day-pill').forEach(p=>{
+  p.onclick=function(){
+    this.classList.toggle('sel');
+    const sel=[...document.querySelectorAll('.day-pill.sel')].map(x=>x.dataset.day);
+    document.getElementById('day-count').textContent=sel.length+' day'+(sel.length!==1?'s':'')+' selected';
+    document.getElementById('rm-days-preview').textContent=sel.join(', ')||'none';
+  };
+});
+
+document.getElementById('rm-time').addEventListener('input',function(){
+  document.getElementById('rm-time-preview').textContent=this.value;
+});
+
+document.getElementById('rm-lang').addEventListener('change',function(){
+  document.getElementById('rm-lang-preview').textContent=this.value;
+});
+
+function saveReminder(){
+  const email=document.getElementById('rm-email').value.trim();
+  if(!email){alert('Please enter your email address.');return;}
+  const days=[...document.querySelectorAll('.day-pill.sel')].map(x=>x.dataset.day);
+  if(!days.length){alert('Please select at least one study day.');return;}
+  document.getElementById('rm-success').style.display='block';
+  setTimeout(()=>document.getElementById('rm-success').style.display='none',4000);
+  addBadge('Reminder set','badge-blue');
+}
+</script>
