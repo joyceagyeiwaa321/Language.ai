@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --lulu-ink:#1a1a2e;
+    --lulu-sage:#2d6a4f;
+    --lulu-sage-light:#e8f5ee;
+    --lulu-gold:#c9a84c;
+    --lulu-gold-light:#fdf6e3;
+    --lulu-cream:#faf9f6;
+    --lulu-muted:#6b7280;
+    --lulu-border:#e5e0d8;
+    --lulu-card:#ffffff;
+  }
+  body{font-family:'DM Sans',sans-serif;background:var(--lulu-cream);color:var(--lulu-ink);line-height:1.6;overflow-x:hidden}
+
+  /* NAV */
+  nav{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 3rem;border-bottom:1px solid var(--lulu-border);background:var(--lulu-cream);position:sticky;top:0;z-index:100}
+  .nav-logo{font-family:'Playfair Display',serif;font-size:1.75rem;font-weight:700;color:var(--lulu-sage);letter-spacing:-0.02em}
+  .nav-logo span{color:var(--lulu-gold)}
+  .nav-links{display:flex;gap:2rem;list-style:none}
+  .nav-links a{text-decoration:none;font-size:.9rem;color:var(--lulu-muted);font-weight:400;transition:color .2s}
+  .nav-links a:hover{color:var(--lulu-ink)}
+  .nav-cta{background:var(--lulu-sage);color:#fff;padding:.6rem 1.4rem;border-radius:2rem;font-size:.85rem;font-weight:500;text-decoration:none;transition:background .2s}
+  .nav-cta:hover{background:#1e5537}
+  .nav-langs{display:flex;gap:.5rem}
+  .lang-pill{font-size:.75rem;padding:.2rem .65rem;border-radius:2rem;font-weight:500;cursor:pointer;border:1px solid var(--lulu-border);background:white;color:var(--lulu-muted);transition:all .2s}
+  .lang-pill.active,.lang-pill:hover{background:var(--lulu-sage);color:#fff;border-color:var(--lulu-sage)}
+
+  /* HERO */
+  .hero{display:grid;grid-template-columns:1fr 1fr;gap:4rem;padding:5rem 3rem 4rem;max-width:1200px;margin:0 auto;align-items:center}
+  .hero-eyebrow{font-size:.8rem;text-transform:uppercase;letter-spacing:.15em;color:var(--lulu-gold);font-weight:500;margin-bottom:1rem}
+  .hero h1{font-family:'Playfair Display',serif;font-size:3.5rem;line-height:1.1;font-weight:700;margin-bottom:1.25rem;color:var(--lulu-ink)}
+  .hero h1 em{font-style:italic;color:var(--lulu-sage)}
+  .hero-sub{font-size:1.05rem;color:var(--lulu-muted);margin-bottom:2rem;max-width:420px;font-weight:300;line-height:1.7}
+  .hero-actions{display:flex;gap:1rem;align-items:center}
+  .btn-primary{background:var(--lulu-sage);color:#fff;padding:.85rem 2rem;border-radius:2rem;font-size:.9rem;font-weight:500;text-decoration:none;border:none;cursor:pointer;transition:all .2s;display:inline-block}
+  .btn-primary:hover{background:#1e5537;transform:translateY(-1px)}
+  .btn-ghost{color:var(--lulu-sage);font-size:.9rem;font-weight:500;text-decoration:none;display:flex;align-items:center;gap:.4rem;border:none;background:none;cursor:pointer}
+  .btn-ghost:hover{color:#1e5537}
+
+  /* HERO CARD */
+  .hero-visual{background:white;border-radius:1.5rem;border:1px solid var(--lulu-border);padding:1.75rem;box-shadow:0 4px 32px rgba(0,0,0,.06)}
+  .chat-msg{display:flex;gap:.75rem;margin-bottom:1.25rem;align-items:flex-start}
+  .chat-avatar{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:600}
+  .avatar-lulu{background:var(--lulu-sage-light);color:var(--lulu-sage)}
+  .avatar-user{background:#f0f0f0;color:#555}
+  .chat-bubble{background:var(--lulu-sage-light);border-radius:.25rem 1rem 1rem 1rem;padding:.65rem 1rem;font-size:.85rem;line-height:1.5;color:var(--lulu-ink);max-width:280px}
+  .chat-bubble.user{background:#f5f5f5;border-radius:1rem .25rem 1rem 1rem}
+  .chat-msg.user{flex-direction:row-reverse}
+  .correction-tag{display:inline-block;background:#fef3c7;color:#92400e;font-size:.7rem;padding:.15rem .5rem;border-radius:.5rem;margin-left:.4rem;font-weight:500}
+  .lang-flag{font-size:.85rem;margin-right:.25rem}
+  .chat-typing{display:flex;gap:.3rem;align-items:center;padding:.5rem 0}
+  .dot{width:6px;height:6px;background:var(--lulu-sage);border-radius:50%;animation:bounce .9s infinite}
+  .dot:nth-child(2){animation-delay:.15s}
+  .dot:nth-child(3){animation-delay:.3s}
+  @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+
+  /* STATS BAR */
+  .stats-bar{background:var(--lulu-ink);padding:2rem 3rem;display:flex;justify-content:center;gap:6rem}
+  .stat-item{text-align:center}
+  .stat-num{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--lulu-gold)}
+  .stat-label{font-size:.8rem;color:#a0aec0;margin-top:.2rem}
+
+  /* FEATURES */
+  .section{padding:5rem 3rem;max-width:1200px;margin:0 auto}
+  .section-header{text-align:center;margin-bottom:3.5rem}
+  .section-eyebrow{font-size:.75rem;text-transform:uppercase;letter-spacing:.15em;color:var(--lulu-gold);font-weight:500;margin-bottom:.75rem}
+  .section h2{font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:700;line-height:1.2}
+  .section h2 em{font-style:italic;color:var(--lulu-sage)}
+  .section-sub{font-size:1rem;color:var(--lulu-muted);margin-top:.75rem;max-width:500px;margin-left:auto;margin-right:auto}
+
+  .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+  .feature-card{background:white;border:1px solid var(--lulu-border);border-radius:1.25rem;padding:1.75rem;transition:all .25s;cursor:default}
+  .feature-card:hover{border-color:var(--lulu-sage);transform:translateY(-3px);box-shadow:0 8px 24px rgba(45,106,79,.08)}
+  .feature-icon{width:44px;height:44px;background:var(--lulu-sage-light);border-radius:.75rem;display:flex;align-items:center;justify-content:center;margin-bottom:1.1rem;font-size:1.2rem}
+  .feature-card h3{font-size:1rem;font-weight:500;margin-bottom:.5rem;color:var(--lulu-ink)}
+  .feature-card p{font-size:.85rem;color:var(--lulu-muted);line-height:1.6}
+  .feature-tag{display:inline-block;background:var(--lulu-gold-light);color:#92400e;font-size:.7rem;padding:.15rem .5rem;border-radius:.5rem;margin-top:.75rem;font-weight:500}
+
+  /* LANGUAGES */
+  .langs-section{background:var(--lulu-ink);padding:5rem 3rem;color:white}
+  .langs-inner{max-width:1200px;margin:0 auto}
+  .langs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;margin-top:3rem}
+  .lang-card{border:1px solid rgba(255,255,255,.1);border-radius:1.25rem;padding:2rem;text-align:center;transition:all .25s;cursor:default}
+  .lang-card:hover{border-color:var(--lulu-gold);background:rgba(201,168,76,.05)}
+  .lang-emoji{font-size:2.5rem;margin-bottom:1rem}
+  .lang-card h3{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;margin-bottom:.5rem}
+  .lang-card p{font-size:.85rem;color:#a0aec0;line-height:1.6}
+  .lang-example{background:rgba(255,255,255,.05);border-radius:.75rem;padding:.75rem;margin-top:1.25rem;font-style:italic;font-size:.85rem;color:var(--lulu-gold)}
+
+  /* DASHBOARD PREVIEW */
+  .dashboard-preview{background:white;border:1px solid var(--lulu-border);border-radius:1.5rem;padding:2rem;margin-top:3rem}
+  .dash-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
+  .dash-title{font-size:1rem;font-weight:500}
+  .dash-subtitle{font-size:.8rem;color:var(--lulu-muted)}
+  .progress-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem}
+  .progress-card{background:var(--lulu-cream);border-radius:.75rem;padding:1rem}
+  .prog-label{font-size:.75rem;color:var(--lulu-muted);margin-bottom:.5rem}
+  .prog-bar-wrap{background:#e5e7eb;border-radius:2rem;height:6px;overflow:hidden;margin-bottom:.4rem}
+  .prog-bar{height:100%;border-radius:2rem;background:var(--lulu-sage)}
+  .prog-pct{font-size:.8rem;font-weight:500;color:var(--lulu-sage)}
+  .streak-row{display:flex;gap:.5rem;margin-top:.5rem}
+  .streak-dot{width:20px;height:20px;border-radius:.3rem;font-size:.65rem;display:flex;align-items:center;justify-content:center}
+  .streak-active{background:var(--lulu-sage);color:white}
+  .streak-done{background:#d1fae5;color:var(--lulu-sage)}
+  .streak-empty{background:#f3f4f6;color:#d1d5db}
+
+  /* SCHEDULE */
+  .schedule-section{background:var(--lulu-gold-light);border-top:1px solid #e5d8b0;border-bottom:1px solid #e5d8b0;padding:5rem 3rem}
+  .schedule-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center}
+  .schedule-card{background:white;border-radius:1.5rem;border:1px solid #e5d8b0;padding:2rem}
+  .days-selector{display:flex;gap:.5rem;flex-wrap:wrap;margin:1rem 0}
+  .day-btn{padding:.45rem .9rem;border-radius:2rem;font-size:.8rem;font-weight:500;border:1px solid var(--lulu-border);background:white;color:var(--lulu-muted);cursor:pointer;transition:all .2s}
+  .day-btn.sel{background:var(--lulu-sage);color:white;border-color:var(--lulu-sage)}
+  .freq-slider{width:100%;margin:1rem 0;accent-color:var(--lulu-sage)}
+  .schedule-info h2{font-family:'Playfair Display',serif;font-size:2.2rem;line-height:1.2;margin-bottom:1rem}
+  .schedule-info p{color:var(--lulu-muted);font-size:.95rem;line-height:1.7;margin-bottom:1.5rem}
+  .email-preview{background:white;border:1px solid var(--lulu-border);border-radius:.75rem;padding:.85rem 1rem;font-size:.8rem;display:flex;align-items:center;gap:.65rem}
+  .email-dot{width:8px;height:8px;background:#22c55e;border-radius:50%;flex-shrink:0}
+
+  /* QUIZ / FLASHCARD */
+  .quiz-section{padding:5rem 3rem;max-width:1200px;margin:0 auto}
+  .quiz-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem}
+  .quiz-card{background:white;border:1px solid var(--lulu-border);border-radius:1.5rem;padding:2rem}
+  .quiz-q{font-size:1rem;font-weight:500;margin-bottom:1.25rem}
+  .quiz-option{background:var(--lulu-cream);border:1px solid var(--lulu-border);border-radius:.75rem;padding:.7rem 1rem;font-size:.85rem;margin-bottom:.6rem;cursor:pointer;transition:all .2s}
+  .quiz-option:hover{border-color:var(--lulu-sage);color:var(--lulu-sage)}
+  .quiz-option.correct{background:#d1fae5;border-color:#6ee7b7;color:#065f46}
+  .flashcard{perspective:600px}
+  .card-inner{background:var(--lulu-sage);border-radius:1.25rem;padding:3rem 2rem;text-align:center;color:white;min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer}
+  .card-word{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;margin-bottom:.5rem}
+  .card-hint{font-size:.8rem;opacity:.7}
+  .card-actions{display:flex;gap:.75rem;margin-top:1.25rem}
+  .card-btn{flex:1;padding:.6rem;border-radius:.75rem;font-size:.8rem;font-weight:500;border:none;cursor:pointer;transition:all .2s}
+  .card-ok{background:#d1fae5;color:#065f46}
+  .card-again{background:#fee2e2;color:#991b1b}
+
+  /* FOOTER */
+  footer{background:var(--lulu-ink);color:#a0aec0;padding:3rem;text-align:center;font-size:.85rem}
+  footer .footer-logo{font-family:'Playfair Display',serif;font-size:1.5rem;color:white;margin-bottom:.5rem}
+  footer span{color:var(--lulu-gold)}
+  footer p{margin-top:.5rem;font-size:.8rem}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">lul<span>u</span></div>
+  <ul class="nav-links">
+    <li><a href="#">Features</a></li>
+    <li><a href="#">Languages</a></li>
+    <li><a href="#">Dashboard</a></li>
+    <li><a href="#">For Thomas More</a></li>
+  </ul>
+  <div style="display:flex;align-items:center;gap:1rem">
+    <div class="nav-langs">
+      <span class="lang-pill active">EN</span>
+      <span class="lang-pill">FR</span>
+      <span class="lang-pill">NL</span>
+      <span class="lang-pill">ES</span>
+    </div>
+    <a href="#" class="nav-cta">Get started</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-text">
+    <div class="hero-eyebrow">Thomas More University College</div>
+    <h1>Learn languages<br/><em>the smart way</em></h1>
+    <p class="hero-sub">Lulu is your AI language companion for French, Dutch &amp; Spanish — with grammar help, instant translation, speech practice, and personalised study schedules.</p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="sendPrompt('Tell me more about Lulu\'s features')">Start learning free ↗</button>
+      <button class="btn-ghost">▶ See how it works</button>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div style="font-size:.75rem;color:var(--lulu-muted);margin-bottom:1rem;font-weight:500">Live translation &amp; grammar</div>
+    <div class="chat-msg">
+      <div class="chat-avatar avatar-user">TM</div>
+      <div class="chat-bubble user">How do you say "I study every day" in French?</div>
+    </div>
+    <div class="chat-msg">
+      <div class="chat-avatar avatar-lulu">Lu</div>
+      <div class="chat-bubble">
+        <span class="lang-flag">🇫🇷</span> <strong>J'étudie tous les jours</strong>
+        <span class="correction-tag">présent simple</span>
+        <br/><span style="font-size:.78rem;color:var(--lulu-muted);margin-top:.3rem;display:block">Note: "étudier" is a regular -er verb — easy to conjugate!</span>
+      </div>
+    </div>
+    <div class="chat-msg">
+      <div class="chat-avatar avatar-user">TM</div>
+      <div class="chat-bubble user">Can you quiz me on this?</div>
+    </div>
+    <div class="chat-msg">
+      <div class="chat-avatar avatar-lulu">Lu</div>
+      <div class="chat-bubble">
+        <span class="lang-flag">✏️</span> Sure! Complete the sentence: <em>"Nous ___ tous les jours."</em>
+        <div style="margin-top:.6rem;display:flex;gap:.4rem;flex-wrap:wrap">
+          <span style="background:#e8f5ee;color:var(--lulu-sage);padding:.2rem .6rem;border-radius:.5rem;font-size:.78rem;cursor:pointer">étudions ✓</span>
+          <span style="background:#f5f5f5;color:var(--lulu-muted);padding:.2rem .6rem;border-radius:.5rem;font-size:.78rem;cursor:pointer">étudie</span>
+          <span style="background:#f5f5f5;color:var(--lulu-muted);padding:.2rem .6rem;border-radius:.5rem;font-size:.78rem;cursor:pointer">étudient</span>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:.4rem;align-items:center;margin-top:.5rem;margin-left:2.5rem">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      <span style="font-size:.75rem;color:var(--lulu-muted);margin-left:.25rem">Lulu is typing…</span>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat-item"><div class="stat-num">3</div><div class="stat-label">Languages supported</div></div>
+  <div class="stat-item"><div class="stat-num">10k+</div><div class="stat-label">Vocabulary cards</div></div>
+  <div class="stat-item"><div class="stat-num">95%</div><div class="stat-label">Grammar accuracy</div></div>
+  <div class="stat-item"><div class="stat-num">2–6×</div><div class="stat-label">Weekly study plans</div></div>
+</div>
+
+<!-- FEATURES -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-eyebrow">Everything you need</div>
+    <h2>Built for students,<br/><em>powered by AI</em></h2>
+    <p class="section-sub">Every feature designed around how Thomas More students actually learn.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card" onclick="sendPrompt('Tell me more about Lulu\'s sentence translation feature')">
+      <div class="feature-icon">🔁</div>
+      <h3>Sentence translation</h3>
+      <p>Instant, context-aware translations between English and French, Dutch, or Spanish — not just word-for-word.</p>
+      <span class="feature-tag">EN ↔ FR / NL / ES</span>
+    </div>
+    <div class="feature-card" onclick="sendPrompt('How does Lulu\'s grammar correction work?')">
+      <div class="feature-icon">✏️</div>
+      <h3>Grammar correction</h3>
+      <p>Paste any sentence and get corrections with detailed rule explanations — understand the why, not just the fix.</p>
+      <span class="feature-tag">Rule-based explanations</span>
+    </div>
+    <div class="feature-card" onclick="sendPrompt('Tell me about vocabulary and conjugation in Lulu')">
+      <div class="feature-icon">📖</div>
+      <h3>Vocabulary &amp; conjugation</h3>
+      <p>Look up words, get full conjugation tables, and save them to your personal vocabulary bank for review.</p>
+      <span class="feature-tag">All tenses</span>
+    </div>
+    <div class="feature-card" onclick="sendPrompt('Tell me about Lulu\'s speech and audio features')">
+      <div class="feature-icon">🎙️</div>
+      <h3>Speech &amp; audio</h3>
+      <p>Practice pronunciation with speech recognition. Listen to native-sounding audio for any phrase or sentence.</p>
+      <span class="feature-tag">Speech recognition</span>
+    </div>
+    <div class="feature-card" onclick="sendPrompt('How does note upload and quiz generation work in Lulu?')">
+      <div class="feature-icon">📄</div>
+      <h3>Upload lecture notes</h3>
+      <p>Drop in your PDF or Word notes and Lulu automatically generates summaries, quizzes, and flashcard sets.</p>
+      <span class="feature-tag">PDF / DOCX</span>
+    </div>
+    <div class="feature-card" onclick="sendPrompt('Tell me about Lulu\'s email reminders and study schedules')">
+      <div class="feature-icon">📅</div>
+      <h3>Email reminders</h3>
+      <p>Set your preferred study cadence — 2 to 6 days per week — and Lulu sends personalised reminders to keep you on track.</p>
+      <span class="feature-tag">Customisable</span>
+    </div>
+  </div>
+</div>
+
+<!-- LANGUAGES -->
+<div class="langs-section">
+  <div class="langs-inner">
+    <div style="text-align:center">
+      <div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.15em;color:var(--lulu-gold);margin-bottom:.75rem">Three languages</div>
+      <h2 style="font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:700;color:white">French, Dutch &amp; <em style="color:var(--lulu-gold)">Spanish</em></h2>
+    </div>
+    <div class="langs-grid">
+      <div class="lang-card" onclick="sendPrompt('Tell me about Lulu\'s French language features')">
+        <div class="lang-emoji">🇫🇷</div>
+        <h3>French</h3>
+        <p>From basic conjugation to complex subjunctive forms — Lulu covers the full range of French grammar at B1–C1 level.</p>
+        <div class="lang-example">"Je voudrais améliorer mon français."</div>
+      </div>
+      <div class="lang-card" onclick="sendPrompt('Tell me about Lulu\'s Dutch language features')">
+        <div class="lang-emoji">🇳🇱</div>
+        <h3>Dutch</h3>
+        <p>Word order, de/het, separable verbs — Lulu makes Dutch grammar clear with tailored explanations for English speakers.</p>
+        <div class="lang-example">"Ik wil mijn Nederlands verbeteren."</div>
+      </div>
+      <div class="lang-card" onclick="sendPrompt('Tell me about Lulu\'s Spanish language features')">
+        <div class="lang-emoji">🇪🇸</div>
+        <h3>Spanish</h3>
+        <p>Ser vs estar, preterite vs imperfect — Lulu breaks down the tricky distinctions Spanish learners always struggle with.</p>
+        <div class="lang-example">"Quiero mejorar mi español."</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD PREVIEW -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-eyebrow">Progress dashboard</div>
+    <h2>Track every step<br/>of your <em>journey</em></h2>
+    <p class="section-sub">See how far you've come, where to focus next, and keep your streak alive.</p>
+  </div>
+  <div class="dashboard-preview">
+    <div class="dash-header">
+      <div><div class="dash-title">Your progress — Week 12</div><div class="dash-subtitle">Thomas More · French track</div></div>
+      <div style="display:flex;gap:.75rem">
+        <span style="font-size:.8rem;background:var(--lulu-sage-light);color:var(--lulu-sage);padding:.3rem .75rem;border-radius:2rem;font-weight:500">🔥 5-day streak</span>
+        <span style="font-size:.8rem;background:#fdf6e3;color:#92400e;padding:.3rem .75rem;border-radius:2rem;font-weight:500">B1 level</span>
+      </div>
+    </div>
+    <div class="progress-grid">
+      <div class="progress-card">
+        <div class="prog-label">Grammar accuracy</div>
+        <div class="prog-bar-wrap"><div class="prog-bar" style="width:78%"></div></div>
+        <div class="prog-pct">78% — Great progress!</div>
+      </div>
+      <div class="progress-card">
+        <div class="prog-label">Vocabulary learned</div>
+        <div class="prog-bar-wrap"><div class="prog-bar" style="width:62%;background:var(--lulu-gold)"></div></div>
+        <div class="prog-pct" style="color:var(--lulu-gold)">342 / 550 words</div>
+      </div>
+      <div class="progress-card">
+        <div class="prog-label">Speaking practice</div>
+        <div class="prog-bar-wrap"><div class="prog-bar" style="width:45%;background:#8b5cf6"></div></div>
+        <div class="prog-pct" style="color:#8b5cf6">45% — Keep going</div>
+      </div>
+    </div>
+    <div style="font-size:.8rem;color:var(--lulu-muted);margin-bottom:.5rem;font-weight:500">This week's study days</div>
+    <div class="streak-row">
+      <div class="streak-dot streak-done" title="Mon">M</div>
+      <div class="streak-dot streak-done" title="Tue">T</div>
+      <div class="streak-dot streak-done" title="Wed">W</div>
+      <div class="streak-dot streak-active" title="Thu">T</div>
+      <div class="streak-dot streak-active" title="Fri">F</div>
+      <div class="streak-dot streak-empty" title="Sat">S</div>
+      <div class="streak-dot streak-empty" title="Sun">S</div>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ & FLASHCARD -->
+<div class="quiz-section">
+  <div class="section-header">
+    <div class="section-eyebrow">Active learning</div>
+    <h2>Quizzes &amp; <em>flashcards</em><br/>from your own notes</h2>
+  </div>
+  <div class="quiz-grid">
+    <div class="quiz-card">
+      <div style="font-size:.75rem;color:var(--lulu-muted);margin-bottom:1rem;font-weight:500;text-transform:uppercase;letter-spacing:.05em">Auto-generated quiz</div>
+      <div class="quiz-q">Which is the correct form of "avoir" in the first person plural?</div>
+      <div class="quiz-option" onclick="this.className='quiz-option correct'">nous avons ✓</div>
+      <div class="quiz-option">nous avez</div>
+      <div class="quiz-option">nous ont</div>
+      <div style="font-size:.78rem;color:var(--lulu-muted);margin-top:1rem">Generated from your Chapter 3 lecture notes</div>
+    </div>
+    <div class="quiz-card">
+      <div style="font-size:.75rem;color:var(--lulu-muted);margin-bottom:1rem;font-weight:500;text-transform:uppercase;letter-spacing:.05em">Flashcard review</div>
+      <div class="flashcard">
+        <div class="card-inner">
+          <div class="card-word">travailler</div>
+          <div class="card-hint">tap to reveal translation</div>
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="card-btn card-again">Again 🔄</button>
+        <button class="card-btn card-ok">Got it ✓</button>
+      </div>
+      <div style="font-size:.78rem;color:var(--lulu-muted);margin-top:.75rem;text-align:center">12 cards remaining in today's deck</div>
+    </div>
+  </div>
+</div>
+
+<!-- SCHEDULE -->
+<div class="schedule-section">
+  <div class="schedule-inner">
+    <div class="schedule-info">
+      <div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.15em;color:var(--lulu-gold);margin-bottom:.75rem">Personalised schedules</div>
+      <h2 class="section-h2" style="font-family:'Playfair Display',serif;font-size:2.2rem;line-height:1.2;margin-bottom:1rem">Study on your<br/>own <em style="color:var(--lulu-sage)">terms</em></h2>
+      <p style="color:var(--lulu-muted);font-size:.95rem;line-height:1.7;margin-bottom:1.5rem">Pick how many days a week you want to study — anywhere from 2 to 6 — and Lulu sends you a friendly email reminder with your personalised lesson plan each time.</p>
+      <div class="email-preview">
+        <div class="email-dot"></div>
+        <div>
+          <div style="font-weight:500;font-size:.82rem">Lulu reminder — Today is your French day! 🇫🇷</div>
+          <div style="font-size:.75rem;color:var(--lulu-muted)">Your 20-min session is ready: Subjunctive mood + 8 flashcards</div>
+        </div>
+      </div>
+    </div>
+    <div class="schedule-card">
+      <div style="font-weight:500;margin-bottom:1rem">Configure your schedule</div>
+      <div style="font-size:.8rem;color:var(--lulu-muted);margin-bottom:.4rem">Study days per week</div>
+      <div id="freqVal" style="font-size:1.5rem;font-weight:700;color:var(--lulu-sage);margin-bottom:.25rem">4 days</div>
+      <input class="freq-slider" type="range" min="2" max="6" value="4" id="freqSlider"/>
+      <div style="font-size:.8rem;color:var(--lulu-muted);margin-bottom:.5rem;margin-top:.75rem">Pick your study days</div>
+      <div class="days-selector" id="daysPicker">
+        <span class="day-btn sel">Mon</span>
+        <span class="day-btn sel">Tue</span>
+        <span class="day-btn">Wed</span>
+        <span class="day-btn sel">Thu</span>
+        <span class="day-btn sel">Fri</span>
+        <span class="day-btn">Sat</span>
+        <span class="day-btn">Sun</span>
+      </div>
+      <div style="font-size:.8rem;color:var(--lulu-muted);margin-top:.5rem;margin-bottom:.75rem">Email reminders</div>
+      <button class="btn-primary" style="width:100%;text-align:center" onclick="sendPrompt('How do I set up email reminders in Lulu?')">Save my schedule ↗</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">lul<span>u</span></div>
+  <p>AI language learning for Thomas More students · French · Dutch · Spanish</p>
+  <p style="margin-top:.75rem;color:#4a5568">© 2025 Lulu · Built for Thomas More University College</p>
+</footer>
+
+<script>
+  const slider = document.getElementById('freqSlider');
+  const freqVal = document.getElementById('freqVal');
+  if(slider) slider.addEventListener('input', () => {
+    freqVal.textContent = slider.value + ' days';
+  });
+  document.querySelectorAll('.day-btn').forEach(btn => {
+    btn.addEventListener('click', () => btn.classList.toggle('sel'));
+  });
+  document.querySelectorAll('.lang-pill').forEach(pill => {
+    pill.addEventListener('click', function(){
+      document.querySelectorAll('.lang-pill').forEach(p => p.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+  const flashcard = document.querySelector('.card-inner');
+  const words = [
+    {word:'travailler',hint:'tap to reveal'},
+    {word:'apprendre',hint:'tap to reveal'},
+    {word:'comprendre',hint:'tap to reveal'}
+  ];
+  let revealed = false, idx = 0;
+  const translations = ['to work','to learn','to understand'];
+  if(flashcard) flashcard.addEventListener('click', () => {
+    if(!revealed){
+      flashcard.querySelector('.card-hint').textContent = translations[idx];
+      revealed = true;
+    }
+  });
+  document.querySelectorAll('.card-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      idx = (idx+1) % words.length;
+      revealed = false;
+      flashcard.querySelector('.card-word').textContent = words[idx].word;
+      flashcard.querySelector('.card-hint').textContent = 'tap to reveal translation';
+    });
+  });
+</script>
+</body>
+</html>
