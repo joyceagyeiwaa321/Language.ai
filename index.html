@@ -1,493 +1,1057 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lulu — AI Language Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
+:root{
+  --ink:#0d0d0d;
+  --paper:#f7f4ef;
+  --sage:#2a7a52;
+  --sage-light:#e6f4ed;
+  --amber:#e8a020;
+  --amber-light:#fef5e0;
+  --rose:#e05c5c;
+  --rose-light:#fde8e8;
+  --sky:#3a7bd5;
+  --sky-light:#e3edf9;
+  --border:#ddd8cf;
+  --muted:#7a7570;
+  --card:#ffffff;
+  --radius:14px;
+  --font-display:'Syne',sans-serif;
+  --font-serif:'Instrument Serif',serif;
+  --font-mono:'DM Mono',monospace;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--font-sans);background:var(--color-background-tertiary);color:var(--color-text-primary)}
-.topbar{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
-.logo{font-family:var(--font-serif);font-size:18px;font-weight:500;color:#2d6a4f}
-.logo span{color:#c9a84c}
-.lang-tabs{display:flex;gap:5px}
-.ltab{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);transition:all .15s}
-.ltab.active{background:#2d6a4f;color:#fff;border-color:#2d6a4f}
-.nav{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);display:flex;gap:0;overflow-x:auto}
-.ntab{padding:9px 13px;font-size:12px;font-weight:500;cursor:pointer;color:var(--color-text-secondary);border-bottom:2px solid transparent;background:none;border-left:none;border-right:none;border-top:none;white-space:nowrap;transition:all .15s}
-.ntab.active{color:#2d6a4f;border-bottom-color:#2d6a4f}
-.panel{display:none;padding:16px;flex-direction:column;gap:14px}
-.panel.active{display:flex}
-.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px}
-label{font-size:12px;color:var(--color-text-secondary);display:block;margin-bottom:5px;font-weight:500}
-textarea,input[type=text],input[type=email],input[type=time]{width:100%;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:8px 11px;font-size:13px;font-family:var(--font-sans);color:var(--color-text-primary);background:var(--color-background-primary);resize:vertical}
-textarea{min-height:70px}
-input[type=text],input[type=email],input[type=time]{height:34px;resize:none}
-textarea:focus,input:focus{outline:none;border-color:#2d6a4f}
-.btn{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-primary);transition:all .15s}
-.btn:hover{background:var(--color-background-secondary)}
-.btn.primary{background:#2d6a4f;color:#fff;border-color:#2d6a4f}
-.btn.primary:hover{background:#1e5537}
-.btn:disabled{opacity:.4;cursor:default}
-.row{display:flex;gap:8px;align-items:flex-end}
-.result-box{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px;font-size:13px;line-height:1.7;color:var(--color-text-primary);min-height:54px;white-space:pre-wrap}
-.result-box.empty{color:var(--color-text-tertiary);font-style:italic}
-.spinner{display:inline-block;width:12px;height:12px;border:2px solid var(--color-border-secondary);border-top-color:#2d6a4f;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:5px}
-@keyframes spin{to{transform:rotate(360deg)}}
-.flash-card{background:#2d6a4f;border-radius:var(--border-radius-lg);padding:28px 16px;text-align:center;cursor:pointer;color:#fff;min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.flash-word{font-family:var(--font-serif);font-size:26px;font-weight:500;margin-bottom:6px}
-.flash-sub{font-size:12px;opacity:.7}
-.quiz-opt{width:100%;text-align:left;padding:9px 12px;border-radius:var(--border-radius-md);font-size:13px;cursor:pointer;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);margin-bottom:5px;transition:all .15s}
-.quiz-opt:hover:not(:disabled){background:var(--color-background-secondary);border-color:#2d6a4f}
-.quiz-opt.correct{background:#d1fae5;border-color:#6ee7b7;color:#065f46}
-.quiz-opt.wrong{background:#fee2e2;border-color:#fca5a5;color:#991b1b}
-.prog-wrap{background:var(--color-background-secondary);border-radius:20px;height:5px;overflow:hidden;margin:5px 0}
-.prog-fill{height:100%;background:#2d6a4f;border-radius:20px;transition:width .3s}
-.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.stat-box{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px;text-align:center}
-.stat-num{font-size:20px;font-weight:500;color:#2d6a4f}
-.stat-lbl{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
-.activity-row{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
-.act-dot{width:18px;height:18px;border-radius:3px;font-size:9px;display:flex;align-items:center;justify-content:center;font-weight:500}
-.drop-zone{border:1.5px dashed var(--color-border-secondary);border-radius:var(--border-radius-lg);padding:28px;text-align:center;cursor:pointer;transition:all .2s;color:var(--color-text-secondary)}
-.drop-zone:hover{border-color:#2d6a4f;background:var(--color-background-secondary)}
-.drop-zone.dragover{border-color:#2d6a4f;background:#e8f5ee}
-.day-pill{padding:5px 10px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);transition:all .15s}
-.day-pill.sel{background:#2d6a4f;color:#fff;border-color:#2d6a4f}
-.reminder-preview{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px;font-size:12px;line-height:1.6}
-.green-dot{width:7px;height:7px;background:#22c55e;border-radius:50%;display:inline-block;margin-right:5px}
-.badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:10px;font-weight:500}
-.badge-green{background:#d1fae5;color:#065f46}
-.badge-amber{background:#fef3c7;color:#92400e}
-.badge-blue{background:#dbeafe;color:#1e40af}
-select{padding:5px 8px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);font-size:13px;color:var(--color-text-primary)}
-</style>
+html{scroll-behavior:smooth}
+body{font-family:var(--font-display);background:var(--paper);color:var(--ink);min-height:100vh;overflow-x:hidden}
 
-<div class="topbar">
-  <div class="logo">lul<span>u</span></div>
-  <div class="lang-tabs">
-    <button class="ltab active" onclick="setLang('French','fr',this)">French</button>
-    <button class="ltab" onclick="setLang('Dutch','nl',this)">Dutch</button>
-    <button class="ltab" onclick="setLang('Spanish','es',this)">Spanish</button>
+/* ── LAYOUT ── */
+.shell{display:grid;grid-template-columns:260px 1fr;grid-template-rows:56px 1fr;min-height:100vh}
+.topbar{grid-column:1/-1;background:var(--ink);display:flex;align-items:center;padding:0 20px;gap:16px;position:sticky;top:0;z-index:200;border-bottom:1px solid #222}
+.sidebar{background:#111;color:#fff;padding:20px 0;display:flex;flex-direction:column;gap:2px;overflow-y:auto;position:sticky;top:56px;height:calc(100vh - 56px)}
+.main{background:var(--paper);overflow-y:auto;height:calc(100vh - 56px)}
+
+/* ── TOPBAR ── */
+.logo{font-family:var(--font-serif);font-size:22px;color:#fff;font-weight:400;font-style:italic;letter-spacing:-0.5px}
+.logo b{color:var(--amber);font-style:normal;font-weight:700}
+.lang-switcher{display:flex;gap:4px;margin-left:auto}
+.lbtn{padding:5px 14px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #333;background:transparent;color:#888;transition:all .2s;font-family:var(--font-display);letter-spacing:.05em}
+.lbtn.active{background:var(--amber);color:var(--ink);border-color:var(--amber)}
+.lbtn:hover:not(.active){border-color:#555;color:#ccc}
+.topbar-badge{background:#1a1a1a;border:1px solid #333;border-radius:20px;padding:4px 12px;font-size:11px;color:#888;font-family:var(--font-mono)}
+
+/* ── SIDEBAR ── */
+.sidebar-section{padding:6px 16px 2px;font-size:9px;font-weight:700;letter-spacing:.15em;color:#555;text-transform:uppercase;margin-top:8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;color:#999;font-size:13px;font-weight:500;border-radius:0;transition:all .15s;border-left:3px solid transparent;text-decoration:none}
+.nav-item:hover{background:#1a1a1a;color:#fff}
+.nav-item.active{background:#1a1a1a;color:#fff;border-left-color:var(--amber)}
+.nav-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.sidebar-divider{height:1px;background:#1e1e1e;margin:8px 16px}
+.source-item{margin:4px 12px;background:#1a1a1a;border:1px solid #252525;border-radius:8px;padding:8px 10px;cursor:pointer;transition:all .2s}
+.source-item:hover{border-color:#333}
+.source-title{font-size:11px;color:#ccc;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.source-meta{font-size:10px;color:#555;margin-top:1px;font-family:var(--font-mono)}
+.add-source{margin:8px 12px;background:transparent;border:1px dashed #2a2a2a;border-radius:8px;padding:8px 10px;cursor:pointer;text-align:center;color:#444;font-size:11px;font-family:var(--font-display);transition:all .2s}
+.add-source:hover{border-color:#444;color:#666}
+
+/* ── PANELS ── */
+.panel{display:none;padding:32px 40px;max-width:1000px;animation:fadein .25s}
+.panel.active{display:block}
+@keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.panel-header{margin-bottom:28px}
+.panel-title{font-family:var(--font-serif);font-size:32px;font-style:italic;color:var(--ink);line-height:1.1}
+.panel-sub{font-size:13px;color:var(--muted);margin-top:6px;font-weight:400}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:box-shadow .2s}
+.card:hover{box-shadow:0 4px 20px rgba(0,0,0,.07)}
+.card-title{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+
+/* ── INPUTS ── */
+label{font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;letter-spacing:.05em;text-transform:uppercase}
+textarea,input[type=text],input[type=email],input[type=time],select{width:100%;border:1px solid var(--border);border-radius:8px;padding:10px 13px;font-size:13px;font-family:var(--font-display);color:var(--ink);background:var(--paper);transition:border .15s}
+textarea{min-height:80px;resize:vertical;line-height:1.6}
+input[type=text],input[type=email],input[type=time]{height:38px}
+select{height:38px;cursor:pointer}
+textarea:focus,input:focus,select:focus{outline:none;border-color:var(--sage);box-shadow:0 0 0 3px var(--sage-light)}
+.row{display:flex;gap:10px;align-items:flex-end}
+.row>*:first-child{flex:1}
+
+/* ── BUTTONS ── */
+.btn{padding:8px 20px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--paper);color:var(--ink);transition:all .15s;font-family:var(--font-display);letter-spacing:.03em;white-space:nowrap}
+.btn:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn-sage{background:var(--sage);color:#fff;border-color:var(--sage)}
+.btn-sage:hover{background:#1e5537;border-color:#1e5537;color:#fff}
+.btn-amber{background:var(--amber);color:var(--ink);border-color:var(--amber)}
+.btn-amber:hover{background:#c88010;color:#fff;border-color:#c88010}
+.btn-full{width:100%;text-align:center;display:block}
+.btn:disabled{opacity:.4;cursor:default;pointer-events:none}
+.btn-icon{padding:8px 12px;font-size:16px}
+.btn-group{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ── RESULT BOX ── */
+.result{background:var(--paper);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:13px;line-height:1.8;min-height:56px;white-space:pre-wrap;color:var(--ink)}
+.result.empty{color:var(--muted);font-style:italic}
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--sage);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── NOTEBOOK / STUDIO ── */
+.studio-grid{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+.source-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.chip{display:flex;align-items:center;gap:6px;background:var(--ink);color:#fff;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer}
+.chip-rm{background:none;border:none;color:#888;cursor:pointer;font-size:12px;padding:0;line-height:1;transition:color .15s}
+.chip-rm:hover{color:#fff}
+.drop-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:36px 20px;text-align:center;cursor:pointer;transition:all .2s;background:transparent}
+.drop-zone:hover,.drop-zone.over{border-color:var(--sage);background:var(--sage-light)}
+.drop-icon{font-size:28px;margin-bottom:8px}
+.drop-text{font-size:13px;font-weight:600;color:var(--ink)}
+.drop-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.action-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.action-row{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .15s}
+.action-row:last-child{border-bottom:none}
+.action-row:hover{background:var(--paper)}
+.action-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.action-label{font-size:13px;font-weight:600}
+.action-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.action-arrow{margin-left:auto;color:var(--muted);font-size:12px}
+
+/* ── NOTES OUTPUT ── */
+.notes-tabs{display:flex;gap:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.notes-tab{flex:1;padding:9px;text-align:center;font-size:12px;font-weight:600;cursor:pointer;background:transparent;border:none;color:var(--muted);transition:all .15s;font-family:var(--font-display)}
+.notes-tab.active{background:var(--ink);color:#fff}
+
+/* ── FLASHCARDS ── */
+.flash-scene{perspective:800px;margin-bottom:12px}
+.flash-card{background:linear-gradient(135deg,var(--sage) 0%,#1a5c3a 100%);border-radius:var(--radius);padding:40px 24px;text-align:center;cursor:pointer;color:#fff;min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:transform .6s;transform-style:preserve-3d;position:relative}
+.flash-card.flipped{transform:rotateY(180deg)}
+.flash-front,.flash-back{backface-visibility:hidden;position:absolute;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;border-radius:var(--radius)}
+.flash-back{transform:rotateY(180deg);background:linear-gradient(135deg,var(--amber) 0%,#c88010 100%);color:var(--ink)}
+.flash-word{font-family:var(--font-serif);font-size:30px;font-style:italic;margin-bottom:4px}
+.flash-hint{font-size:11px;opacity:.7;font-family:var(--font-mono)}
+.flash-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fc-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.fc-stat{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center}
+.fc-num{font-size:22px;font-weight:700;color:var(--sage)}
+.fc-lbl{font-size:10px;color:var(--muted);margin-top:1px;text-transform:uppercase;letter-spacing:.05em}
+
+/* ── QUIZ ── */
+.quiz-q{font-size:15px;font-weight:600;margin-bottom:14px;line-height:1.5}
+.quiz-opt{width:100%;text-align:left;padding:11px 14px;border-radius:8px;font-size:13px;cursor:pointer;border:1px solid var(--border);background:var(--paper);color:var(--ink);margin-bottom:6px;transition:all .15s;font-family:var(--font-display);font-weight:500}
+.quiz-opt:hover:not(:disabled){background:var(--sage-light);border-color:var(--sage)}
+.quiz-opt.correct{background:#d1fae5;border-color:#6ee7b7;color:#065f46}
+.quiz-opt.wrong{background:var(--rose-light);border-color:var(--rose);color:#991b1b}
+.quiz-explain{display:none;margin-top:10px;font-size:12px;line-height:1.7;color:var(--muted);background:var(--paper);padding:10px 12px;border-radius:8px;border-left:3px solid var(--amber)}
+.prog-bar{background:var(--border);border-radius:20px;height:5px;overflow:hidden;margin-bottom:16px}
+.prog-fill{height:100%;background:var(--sage);border-radius:20px;transition:width .4s}
+
+/* ── PROGRESS ── */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}
+.stat-num{font-family:var(--font-serif);font-size:36px;font-style:italic;color:var(--sage)}
+.stat-lbl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.heatmap{display:flex;gap:4px;flex-wrap:wrap}
+.hm-cell{width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700}
+.badge-grid{display:flex;flex-wrap:wrap;gap:8px}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:5px 10px;border-radius:20px}
+.badge-sage{background:var(--sage-light);color:var(--sage)}
+.badge-amber{background:var(--amber-light);color:#92400e}
+.badge-sky{background:var(--sky-light);color:var(--sky)}
+.badge-rose{background:var(--rose-light);color:var(--rose)}
+
+/* ── REMINDER ── */
+.day-pills{display:flex;gap:6px;flex-wrap:wrap}
+.dpill{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all .15s;font-family:var(--font-display)}
+.dpill.sel{background:var(--sage);color:#fff;border-color:var(--sage)}
+.email-prev{background:var(--ink);color:#fff;border-radius:10px;padding:14px 16px;font-size:12px;line-height:1.7;margin-top:12px}
+.email-dot{width:8px;height:8px;background:#22c55e;border-radius:50%;display:inline-block;margin-right:6px}
+
+/* ── TEACHER MODE ── */
+.lesson-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:12px;transition:all .2s;cursor:pointer}
+.lesson-card:hover{border-color:var(--sage);box-shadow:0 4px 16px rgba(42,122,82,.1)}
+.lesson-level{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;margin-bottom:8px;letter-spacing:.05em}
+.lesson-title{font-size:14px;font-weight:700;margin-bottom:4px}
+.lesson-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.lesson-meta{display:flex;align-items:center;gap:12px;margin-top:10px;font-size:11px;color:var(--muted)}
+.xp-bar{background:var(--border);border-radius:20px;height:6px;overflow:hidden;margin-top:6px}
+.xp-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--amber),var(--sage))}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:999;transform:translateY(80px);opacity:0;transition:all .3s;max-width:320px}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* ── TYPING INDICATOR ── */
+.typing{display:inline-flex;gap:3px;align-items:center;vertical-align:middle;margin-left:4px}
+.typing span{width:5px;height:5px;background:var(--sage);border-radius:50%;animation:typing .9s infinite}
+.typing span:nth-child(2){animation-delay:.15s}
+.typing span:nth-child(3){animation-delay:.3s}
+@keyframes typing{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
+
+/* ── MOBILE ── */
+@media(max-width:768px){
+  .shell{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .panel{padding:20px}
+  .studio-grid{grid-template-columns:1fr}
+  .stat-grid{grid-template-columns:repeat(2,1fr)}
+  .grid2,.grid3{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="logo"><b>lulu</b> <span style="color:#555;font-size:14px">·</span> language studio</div>
+  <div class="topbar-badge">Thomas More</div>
+  <div class="lang-switcher">
+    <button class="lbtn active" onclick="setLang('French','fr',this)">🇫🇷 FR</button>
+    <button class="lbtn" onclick="setLang('Dutch','nl',this)">🇳🇱 NL</button>
+    <button class="lbtn" onclick="setLang('Spanish','es',this)">🇪🇸 ES</button>
+  </div>
+</header>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div style="padding:0 12px 8px">
+    <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size:13px;color:#666;margin-bottom:2px">Good morning 👋</div>
+    <div style="font-size:11px;color:#444;font-family:'DM Mono',monospace" id="sb-lang">Studying: French</div>
+  </div>
+  <div class="sidebar-divider"></div>
+
+  <div class="sidebar-section">Study</div>
+  <a class="nav-item active" onclick="showPanel('studio',this)">
+    <span class="nav-icon">📚</span> Studio
+  </a>
+  <a class="nav-item" onclick="showPanel('teacher',this)">
+    <span class="nav-icon">🎓</span> Lessons
+  </a>
+  <a class="nav-item" onclick="showPanel('translate',this)">
+    <span class="nav-icon">🔁</span> Translate
+  </a>
+  <a class="nav-item" onclick="showPanel('grammar',this)">
+    <span class="nav-icon">✏️</span> Grammar
+  </a>
+  <a class="nav-item" onclick="showPanel('vocab',this)">
+    <span class="nav-icon">📖</span> Vocabulary
+  </a>
+  <a class="nav-item" onclick="showPanel('flashcards',this)">
+    <span class="nav-icon">🃏</span> Flashcards
+  </a>
+  <a class="nav-item" onclick="showPanel('quiz',this)">
+    <span class="nav-icon">🎯</span> Quiz
+  </a>
+
+  <div class="sidebar-section" style="margin-top:10px">Tools</div>
+  <a class="nav-item" onclick="showPanel('progress',this)">
+    <span class="nav-icon">📊</span> My Progress
+  </a>
+  <a class="nav-item" onclick="showPanel('reminder',this)">
+    <span class="nav-icon">🔔</span> Reminders
+  </a>
+
+  <div class="sidebar-divider" style="margin-top:auto"></div>
+  <div style="padding:12px 16px">
+    <div style="font-size:10px;color:#444;font-family:'DM Mono',monospace;margin-bottom:6px">UPLOADED SOURCES</div>
+    <div id="sb-sources"><div style="font-size:11px;color:#333;font-style:italic">No sources yet</div></div>
+    <div class="add-source" onclick="showPanel('studio',document.querySelector('.nav-item'))">+ Add source</div>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+<!-- ── STUDIO PANEL ── -->
+<div id="studio" class="panel active">
+  <div class="panel-header">
+    <div class="panel-title">Your Language Studio</div>
+    <div class="panel-sub">Upload lecture slides or notes — Lulu will summarise, quiz you, and build flashcards in any language.</div>
+  </div>
+  <div class="studio-grid">
+    <div>
+      <!-- Upload -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Sources</div>
+        <div id="source-chips" class="source-chips"></div>
+        <div class="drop-zone" id="dz" onclick="document.getElementById('file-in').click()"
+          ondragover="event.preventDefault();this.classList.add('over')"
+          ondragleave="this.classList.remove('over')"
+          ondrop="handleDrop(event)">
+          <div class="drop-icon">📄</div>
+          <div class="drop-text">Drop PDF, TXT, or PPTX here</div>
+          <div class="drop-sub">or click to browse · Multiple files supported</div>
+        </div>
+        <input type="file" id="file-in" accept=".pdf,.txt,.pptx" multiple style="display:none" onchange="handleFiles(this.files)"/>
+      </div>
+
+      <!-- Output language -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Output Language</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-sage btn-sm" onclick="setOutputLang('English',this)">English</button>
+          <button class="btn btn-sm" onclick="setOutputLang('French',this)">Français</button>
+          <button class="btn btn-sm" onclick="setOutputLang('Dutch',this)">Nederlands</button>
+          <button class="btn btn-sm" onclick="setOutputLang('Spanish',this)">Español</button>
+          <button class="btn btn-sm" onclick="setOutputLang('German',this)">Deutsch</button>
+          <button class="btn btn-sm" onclick="setOutputLang('Arabic',this)">العربية</button>
+          <button class="btn btn-sm" onclick="setOutputLang('Chinese',this)">中文</button>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:var(--muted)">Output language: <strong id="out-lang-display">English</strong></div>
+      </div>
+
+      <!-- Processing result -->
+      <div class="card" id="studio-result-card" style="display:none">
+        <div class="notes-tabs">
+          <button class="notes-tab active" onclick="switchNotesTab('summary',this)">Summary</button>
+          <button class="notes-tab" onclick="switchNotesTab('quiz',this)">Quiz</button>
+          <button class="notes-tab" onclick="switchNotesTab('flashcards',this)">Flashcards</button>
+          <button class="notes-tab" onclick="switchNotesTab('keyterms',this)">Key Terms</button>
+        </div>
+        <div id="notes-summary"><div class="result empty" id="summary-out">Summary will appear here…</div></div>
+        <div id="notes-quiz" style="display:none"></div>
+        <div id="notes-flashcards" style="display:none"></div>
+        <div id="notes-keyterms" style="display:none"><div class="result empty" id="keyterms-out">Key terms will appear here…</div></div>
+      </div>
+    </div>
+
+    <!-- Action panel -->
+    <div>
+      <div class="card-title" style="margin-bottom:8px">Generate from source</div>
+      <div class="action-card">
+        <div class="action-row" onclick="generateAction('summary')">
+          <div class="action-icon" style="background:var(--sage-light)">📝</div>
+          <div><div class="action-label">Summarise</div><div class="action-sub">Get a clear summary of your notes</div></div>
+          <span class="action-arrow">›</span>
+        </div>
+        <div class="action-row" onclick="generateAction('quiz')">
+          <div class="action-icon" style="background:var(--amber-light)">🎯</div>
+          <div><div class="action-label">Generate quiz</div><div class="action-sub">5 multiple-choice questions</div></div>
+          <span class="action-arrow">›</span>
+        </div>
+        <div class="action-row" onclick="generateAction('flashcards')">
+          <div class="action-icon" style="background:var(--sky-light)">🃏</div>
+          <div><div class="action-label">Make flashcards</div><div class="action-sub">Key vocabulary from your notes</div></div>
+          <span class="action-arrow">›</span>
+        </div>
+        <div class="action-row" onclick="generateAction('keyterms')">
+          <div class="action-icon" style="background:var(--rose-light)">🔑</div>
+          <div><div class="action-label">Key terms</div><div class="action-sub">Definitions of important words</div></div>
+          <span class="action-arrow">›</span>
+        </div>
+      </div>
+
+      <div style="margin-top:16px" class="card">
+        <div class="card-title">Ask about your notes</div>
+        <textarea id="notes-q" placeholder="e.g. Explain the main grammar rule from slide 3…" style="min-height:60px"></textarea>
+        <button class="btn btn-sage btn-full" style="margin-top:8px" onclick="askAboutNotes()">Ask Lulu</button>
+        <div class="result empty" id="notes-ask-out" style="margin-top:10px;display:none"></div>
+      </div>
+    </div>
   </div>
 </div>
-<div class="nav">
-  <button class="ntab active" onclick="showPanel('translate',this)">Translate</button>
-  <button class="ntab" onclick="showPanel('grammar',this)">Grammar</button>
-  <button class="ntab" onclick="showPanel('vocab',this)">Vocabulary</button>
-  <button class="ntab" onclick="showPanel('flashcards',this)">Flashcards</button>
-  <button class="ntab" onclick="showPanel('quiz',this)">Quiz</button>
-  <button class="ntab" onclick="showPanel('notes',this)">Upload notes</button>
-  <button class="ntab" onclick="showPanel('progress',this)">Progress</button>
-  <button class="ntab" onclick="showPanel('reminder',this)">Reminders</button>
+
+<!-- ── TEACHER / LESSONS PANEL ── -->
+<div id="teacher" class="panel">
+  <div class="panel-header">
+    <div class="panel-title">Lessons</div>
+    <div class="panel-sub">Structured language lessons like Duolingo — pick a topic and learn step by step.</div>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap" id="lesson-filters">
+    <button class="btn btn-sage" onclick="filterLessons('all',this)">All</button>
+    <button class="btn" onclick="filterLessons('beginner',this)">Beginner</button>
+    <button class="btn" onclick="filterLessons('intermediate',this)">Intermediate</button>
+    <button class="btn" onclick="filterLessons('advanced',this)">Advanced</button>
+  </div>
+  <div id="lessons-grid"></div>
+  <div id="lesson-active" style="display:none">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+      <button class="btn" onclick="closeLessonActive()">← Back</button>
+      <div id="lesson-active-title" style="font-size:16px;font-weight:700"></div>
+    </div>
+    <div class="card">
+      <div class="prog-bar"><div class="prog-fill" id="lesson-prog" style="width:0%"></div></div>
+      <div id="lesson-content"></div>
+    </div>
+  </div>
 </div>
 
-<!-- TRANSLATE -->
-<div id="translate" class="panel active">
-  <div class="card">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-      <span style="font-size:12px;color:var(--color-text-secondary)">Direction:</span>
-      <select id="dir">
+<!-- ── TRANSLATE PANEL ── -->
+<div id="translate" class="panel">
+  <div class="panel-header">
+    <div class="panel-title">Translate</div>
+    <div class="panel-sub">Instant, context-aware translation in both directions.</div>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <label style="margin-bottom:0">Direction</label>
+      <select id="tr-dir" style="width:auto;flex:1;max-width:260px">
         <option value="en2tgt">English → French</option>
         <option value="tgt2en">French → English</option>
       </select>
     </div>
-    <label>Your sentence</label>
-    <textarea id="tr-input" placeholder="Type a sentence to translate…"></textarea>
-    <div style="margin-top:8px;display:flex;gap:8px">
-      <button class="btn primary" onclick="doTranslate()">Translate</button>
-      <button class="btn" onclick="resetOut('tr-input','tr-out','Translation will appear here…')">Clear</button>
+    <label>Your text</label>
+    <textarea id="tr-in" placeholder="Type or paste a sentence…"></textarea>
+    <div class="btn-group" style="margin-top:10px">
+      <button class="btn btn-sage" onclick="doTranslate()">Translate</button>
+      <button class="btn" onclick="tr_in.value='';resetResult('tr-out','Translation will appear here…')">Clear</button>
     </div>
   </div>
   <div class="card">
     <label>Translation</label>
-    <div class="result-box empty" id="tr-out">Translation will appear here…</div>
+    <div class="result empty" id="tr-out">Translation will appear here…</div>
   </div>
 </div>
 
-<!-- GRAMMAR -->
+<!-- ── GRAMMAR PANEL ── -->
 <div id="grammar" class="panel">
-  <div class="card">
-    <label>Paste a sentence in <span class="cur-lang">French</span> to check</label>
-    <textarea id="gr-input" placeholder="e.g. Je suis allé au magasin hier…"></textarea>
-    <div style="margin-top:8px;display:flex;gap:8px">
-      <button class="btn primary" onclick="doGrammar()">Check grammar</button>
-      <button class="btn" onclick="resetOut('gr-input','gr-out','Grammar feedback will appear here…')">Clear</button>
+  <div class="panel-header">
+    <div class="panel-title">Grammar Check</div>
+    <div class="panel-sub">Paste any sentence and get corrections with full rule explanations.</div>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <label>Sentence in <span class="cur-lang">French</span></label>
+    <textarea id="gr-in" placeholder="e.g. Je suis allé au magasin hier…"></textarea>
+    <div class="btn-group" style="margin-top:10px">
+      <button class="btn btn-sage" onclick="doGrammar()">Check grammar</button>
+      <button class="btn" onclick="gr_in.value='';resetResult('gr-out','Grammar feedback will appear here…')">Clear</button>
     </div>
   </div>
   <div class="card">
-    <label>Corrections &amp; explanations</label>
-    <div class="result-box empty" id="gr-out">Grammar feedback will appear here…</div>
+    <label>Feedback</label>
+    <div class="result empty" id="gr-out">Grammar feedback will appear here…</div>
   </div>
 </div>
 
-<!-- VOCAB -->
+<!-- ── VOCAB PANEL ── -->
 <div id="vocab" class="panel">
-  <div class="card">
-    <label>Look up a word in <span class="cur-lang">French</span></label>
+  <div class="panel-header">
+    <div class="panel-title">Vocabulary</div>
+    <div class="panel-sub">Look up any word — get definition, conjugation, and example sentences.</div>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <label>Word in <span class="cur-lang">French</span></label>
     <div class="row">
-      <input type="text" id="vc-input" placeholder="e.g. travailler / werken / trabajar" style="flex:1"/>
-      <button class="btn primary" onclick="doVocab()">Look up</button>
+      <input type="text" id="vc-in" placeholder="e.g. travailler / werken / trabajar"/>
+      <button class="btn btn-sage" onclick="doVocab()">Look up</button>
     </div>
   </div>
   <div class="card">
-    <label>Definition, examples &amp; conjugation</label>
-    <div class="result-box empty" id="vc-out">Word info will appear here…</div>
+    <div class="result empty" id="vc-out">Word info will appear here…</div>
   </div>
 </div>
 
-<!-- FLASHCARDS -->
+<!-- ── FLASHCARDS PANEL ── -->
 <div id="flashcards" class="panel">
-  <div class="stat-grid" style="margin-bottom:4px">
-    <div class="stat-box"><div class="stat-num" id="fc-known">0</div><div class="stat-lbl">Known</div></div>
-    <div class="stat-box"><div class="stat-num" id="fc-again" style="color:#991b1b">0</div><div class="stat-lbl">Again</div></div>
-    <div class="stat-box"><div class="stat-num" id="fc-left">—</div><div class="stat-lbl">Remaining</div></div>
+  <div class="panel-header">
+    <div class="panel-title">Flashcards</div>
+    <div class="panel-sub">AI-generated flashcard decks for any topic or vocabulary set.</div>
   </div>
-  <div id="fc-loading" style="display:none;text-align:center;padding:20px;color:var(--color-text-secondary);font-size:13px">
+  <div class="fc-stats">
+    <div class="fc-stat"><div class="fc-num" id="fc-known">0</div><div class="fc-lbl">Known</div></div>
+    <div class="fc-stat"><div class="fc-num" id="fc-again" style="color:var(--rose)">0</div><div class="fc-lbl">Again</div></div>
+    <div class="fc-stat"><div class="fc-num" id="fc-left">—</div><div class="fc-lbl">Left</div></div>
+  </div>
+  <div id="fc-loading" style="display:none;text-align:center;padding:24px;color:var(--muted);font-size:13px">
     <span class="spinner"></span>Generating flashcards…
   </div>
-  <div id="fc-area" style="display:none;flex-direction:column;gap:10px">
-    <div class="flash-card" onclick="revealFlash()">
-      <div class="flash-word" id="fc-word">—</div>
-      <div class="flash-sub" id="fc-hint">tap to reveal</div>
+  <div id="fc-area" style="display:none">
+    <div class="flash-scene">
+      <div class="flash-card" id="fc-card" onclick="flipFlash()">
+        <div class="flash-front">
+          <div class="flash-word" id="fc-word">—</div>
+          <div class="flash-hint" id="fc-pos">tap to flip</div>
+        </div>
+        <div class="flash-back">
+          <div class="flash-word" id="fc-trans" style="font-size:22px">—</div>
+          <div class="flash-hint" id="fc-ex"></div>
+        </div>
+      </div>
     </div>
-    <div style="display:flex;gap:8px">
-      <button style="flex:1;padding:8px;border-radius:var(--border-radius-md);font-size:12px;font-weight:500;cursor:pointer;border:none;background:#fee2e2;color:#991b1b" onclick="rateFlash('again')">Again</button>
-      <button style="flex:1;padding:8px;border-radius:var(--border-radius-md);font-size:12px;font-weight:500;cursor:pointer;border:none;background:#d1fae5;color:#065f46" onclick="rateFlash('ok')">Got it</button>
+    <div class="flash-btns">
+      <button class="btn" style="background:var(--rose-light);border-color:var(--rose);color:var(--rose)" onclick="rateFlash('again')">Again 🔄</button>
+      <button class="btn" style="background:var(--sage-light);border-color:var(--sage);color:var(--sage)" onclick="rateFlash('ok')">Got it ✓</button>
     </div>
   </div>
-  <div class="card">
-    <label>Generate flashcard decks</label>
+  <div class="card" style="margin-top:14px">
+    <label>Generate deck</label>
     <div class="row">
-      <input type="text" id="fc-topic" placeholder="Topic e.g. food, travel, verbs…" style="flex:1"/>
-      <button class="btn primary" onclick="loadFlashcards()">Generate</button>
+      <input type="text" id="fc-topic" placeholder="Topic e.g. food, travel, body parts…"/>
+      <button class="btn btn-sage" onclick="loadFlashcards()">Generate</button>
     </div>
   </div>
 </div>
 
-<!-- QUIZ -->
+<!-- ── QUIZ PANEL ── -->
 <div id="quiz" class="panel">
-  <div id="qz-setup" class="card">
-    <label>Quiz topic (optional)</label>
+  <div class="panel-header">
+    <div class="panel-title">Quiz Me</div>
+    <div class="panel-sub">AI-generated multiple-choice quizzes with explanations.</div>
+  </div>
+  <div id="qz-setup" class="card" style="margin-bottom:0">
+    <label>Topic (optional)</label>
     <div class="row">
-      <input type="text" id="qz-topic" placeholder="e.g. irregular verbs, colours…" style="flex:1"/>
-      <button class="btn primary" onclick="startQuiz()">Start quiz</button>
+      <input type="text" id="qz-topic" placeholder="e.g. irregular verbs, numbers, colours…"/>
+      <button class="btn btn-sage" onclick="startQuiz()" id="qz-start-btn">Start quiz</button>
     </div>
-    <div id="qz-err" style="display:none;font-size:12px;color:var(--color-text-danger);margin-top:6px"></div>
   </div>
-  <div id="qz-area" style="display:none;flex-direction:column;gap:10px">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <span style="font-size:12px;color:var(--color-text-secondary)" id="qz-prog">Question 1 of 5</span>
-      <span style="font-size:12px;font-weight:500;color:#2d6a4f" id="qz-sc">Score: 0</span>
+  <div id="qz-area" style="display:none;margin-top:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <span style="font-size:12px;color:var(--muted);font-weight:600" id="qz-prog">Q1 of 5</span>
+      <span style="font-size:13px;font-weight:700;color:var(--sage)" id="qz-sc">0 pts</span>
     </div>
-    <div class="prog-wrap"><div class="prog-fill" id="qz-bar" style="width:20%"></div></div>
+    <div class="prog-bar"><div class="prog-fill" id="qz-bar" style="width:20%"></div></div>
     <div class="card">
-      <div style="font-size:13px;font-weight:500;margin-bottom:12px" id="qz-q">Loading…</div>
+      <div class="quiz-q" id="qz-q"></div>
       <div id="qz-opts"></div>
-      <div id="qz-explain" style="display:none;margin-top:8px;font-size:12px;line-height:1.6;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:8px;border-radius:var(--border-radius-md)"></div>
+      <div class="quiz-explain" id="qz-explain"></div>
     </div>
-    <button class="btn primary" id="qz-next" style="display:none;width:fit-content" onclick="nextQuestion()">Next question</button>
+    <button class="btn btn-amber" id="qz-next" style="display:none;margin-top:10px" onclick="nextQzQ()">Next →</button>
   </div>
-  <div id="qz-done" style="display:none">
-    <div class="card" style="text-align:center;padding:24px">
-      <div style="font-size:30px;font-weight:500;color:#2d6a4f" id="qz-final">—</div>
-      <div style="font-size:13px;color:var(--color-text-secondary);margin:6px 0 14px">Quiz complete!</div>
-      <button class="btn primary" onclick="resetQuiz()">New quiz</button>
-    </div>
-  </div>
-</div>
-
-<!-- UPLOAD NOTES -->
-<div id="notes" class="panel">
-  <div class="card">
-    <label>Upload lecture notes (PDF or TXT)</label>
-    <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="handleDrop(event)">
-      <div style="font-size:22px;margin-bottom:6px">📄</div>
-      <div style="font-size:13px;font-weight:500">Drop your file here or click to browse</div>
-      <div style="font-size:11px;margin-top:4px">PDF or plain text files supported</div>
-    </div>
-    <input type="file" id="file-input" accept=".pdf,.txt" style="display:none" onchange="handleFile(this.files[0])"/>
-    <div id="file-name" style="display:none;margin-top:8px;font-size:12px;color:#2d6a4f;font-weight:500"></div>
-  </div>
-  <div class="card" id="notes-actions" style="display:none">
-    <label>What would you like to generate?</label>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
-      <button class="btn primary" onclick="generateFromNotes('summary')">Summarise</button>
-      <button class="btn" onclick="generateFromNotes('quiz')">Generate quiz</button>
-      <button class="btn" onclick="generateFromNotes('flashcards')">Make flashcards</button>
-    </div>
-  </div>
-  <div id="notes-loading" style="display:none;text-align:center;padding:20px;font-size:13px;color:var(--color-text-secondary)">
-    <span class="spinner"></span><span id="notes-loading-msg">Processing…</span>
-  </div>
-  <div class="card" id="notes-out-card" style="display:none">
-    <label id="notes-out-label">Result</label>
-    <div class="result-box" id="notes-out" style="min-height:100px"></div>
-  </div>
-  <div id="notes-quiz-area" style="display:none;flex-direction:column;gap:10px">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <span style="font-size:12px;color:var(--color-text-secondary)" id="nqz-prog">Question 1 of 5</span>
-      <span style="font-size:12px;font-weight:500;color:#2d6a4f" id="nqz-sc">Score: 0</span>
-    </div>
-    <div class="prog-wrap"><div class="prog-fill" id="nqz-bar" style="width:20%"></div></div>
-    <div class="card">
-      <div style="font-size:13px;font-weight:500;margin-bottom:12px" id="nqz-q"></div>
-      <div id="nqz-opts"></div>
-      <div id="nqz-explain" style="display:none;margin-top:8px;font-size:12px;line-height:1.6;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:8px;border-radius:var(--border-radius-md)"></div>
-    </div>
-    <button class="btn primary" id="nqz-next" style="display:none;width:fit-content" onclick="nextNotesQuestion()">Next question</button>
-  </div>
-  <div id="notes-fc-area" style="display:none;flex-direction:column;gap:10px">
-    <div class="stat-grid">
-      <div class="stat-box"><div class="stat-num" id="nfc-known">0</div><div class="stat-lbl">Known</div></div>
-      <div class="stat-box"><div class="stat-num" id="nfc-again" style="color:#991b1b">0</div><div class="stat-lbl">Again</div></div>
-      <div class="stat-box"><div class="stat-num" id="nfc-left">—</div><div class="stat-lbl">Left</div></div>
-    </div>
-    <div class="flash-card" onclick="revealNotesFlash()">
-      <div class="flash-word" id="nfc-word" style="font-size:18px">—</div>
-      <div class="flash-sub" id="nfc-hint">tap to reveal</div>
-    </div>
-    <div style="display:flex;gap:8px">
-      <button style="flex:1;padding:8px;border-radius:var(--border-radius-md);font-size:12px;font-weight:500;cursor:pointer;border:none;background:#fee2e2;color:#991b1b" onclick="rateNotesFlash('again')">Again</button>
-      <button style="flex:1;padding:8px;border-radius:var(--border-radius-md);font-size:12px;font-weight:500;cursor:pointer;border:none;background:#d1fae5;color:#065f46" onclick="rateNotesFlash('ok')">Got it</button>
+  <div id="qz-done" style="display:none;margin-top:16px">
+    <div class="card" style="text-align:center;padding:32px">
+      <div style="font-size:48px;margin-bottom:8px" id="qz-emoji">🎉</div>
+      <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size:32px;color:var(--sage)" id="qz-final">—</div>
+      <div style="font-size:13px;color:var(--muted);margin:6px 0 20px" id="qz-msg"></div>
+      <button class="btn btn-sage" onclick="resetQuiz()">New quiz</button>
     </div>
   </div>
 </div>
 
-<!-- PROGRESS -->
+<!-- ── PROGRESS PANEL ── -->
 <div id="progress" class="panel">
+  <div class="panel-header">
+    <div class="panel-title">My Progress</div>
+    <div class="panel-sub">Track your streak, accuracy, and achievements over time.</div>
+  </div>
   <div class="stat-grid">
     <div class="stat-box"><div class="stat-num" id="pg-sessions">0</div><div class="stat-lbl">Sessions</div></div>
-    <div class="stat-box"><div class="stat-num" id="pg-streak">0</div><div class="stat-lbl">Day streak</div></div>
-    <div class="stat-box"><div class="stat-num" id="pg-quizzes">0</div><div class="stat-lbl">Quizzes done</div></div>
+    <div class="stat-box"><div class="stat-num" id="pg-streak">0</div><div class="stat-lbl">Day streak 🔥</div></div>
+    <div class="stat-box"><div class="stat-num" id="pg-quizzes">0</div><div class="stat-lbl">Quizzes</div></div>
+    <div class="stat-box"><div class="stat-num" id="pg-acc">0%</div><div class="stat-lbl">Accuracy</div></div>
   </div>
-  <div class="card">
-    <label>Overall quiz accuracy</label>
-    <div class="prog-wrap"><div class="prog-fill" id="pg-acc-bar" style="width:0%"></div></div>
-    <div style="font-size:12px;color:#2d6a4f;font-weight:500;margin-top:4px" id="pg-acc-txt">0%</div>
-  </div>
-  <div class="card">
-    <label>Activity this week</label>
-    <div class="activity-row" id="pg-activity"></div>
-    <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:6px">Green = studied, empty = not yet</div>
-  </div>
-  <div class="card">
-    <label>Recent achievements</label>
-    <div id="pg-badges" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">
-      <span class="badge badge-amber">First session</span>
+  <div class="grid2" style="margin-bottom:16px">
+    <div class="card">
+      <div class="card-title">Weekly activity</div>
+      <div class="heatmap" id="pg-heatmap"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Flashcard mastery</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <div style="flex:1"><div class="xp-bar"><div class="xp-fill" id="pg-xp-bar" style="width:0%"></div></div></div>
+        <span style="font-size:12px;font-weight:700;color:var(--sage)" id="pg-xp-txt">0 XP</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted)" id="pg-next-level">Keep studying to level up!</div>
     </div>
   </div>
-  <div class="card" style="text-align:center">
-    <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:8px">Keep studying to unlock more stats!</div>
-    <button class="btn" onclick="resetProgress()">Reset progress</button>
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">Achievements</div>
+    <div class="badge-grid" id="pg-badges">
+      <span class="badge badge-sage">🌱 First session</span>
+    </div>
+  </div>
+  <button class="btn" onclick="resetStats()">Reset all progress</button>
+</div>
+
+<!-- ── REMINDER PANEL ── -->
+<div id="reminder" class="panel">
+  <div class="panel-header">
+    <div class="panel-title">Study Reminders</div>
+    <div class="panel-sub">Set your schedule and Lulu will send you personalised email reminders.</div>
+  </div>
+  <div class="grid2">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="card">
+        <label>Your email address</label>
+        <input type="email" id="rm-email" placeholder="student@thomasmore.be"/>
+      </div>
+      <div class="card">
+        <label>Study days</label>
+        <div class="day-pills">
+          <button class="dpill sel" data-day="Mon">Mon</button>
+          <button class="dpill sel" data-day="Tue">Tue</button>
+          <button class="dpill" data-day="Wed">Wed</button>
+          <button class="dpill sel" data-day="Thu">Thu</button>
+          <button class="dpill sel" data-day="Fri">Fri</button>
+          <button class="dpill" data-day="Sat">Sat</button>
+          <button class="dpill" data-day="Sun">Sun</button>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px" id="day-count">4 days selected</div>
+      </div>
+      <div class="card">
+        <label>Reminder time</label>
+        <input type="time" id="rm-time" value="08:00" style="width:160px"/>
+      </div>
+      <div class="card">
+        <label>Language focus</label>
+        <select id="rm-lang" style="width:100%">
+          <option>French</option>
+          <option>Dutch</option>
+          <option>Spanish</option>
+          <option>All three</option>
+        </select>
+      </div>
+      <div class="card">
+        <label>Session length</label>
+        <select id="rm-len" style="width:100%">
+          <option>10 minutes (quick review)</option>
+          <option selected>20 minutes (standard)</option>
+          <option>30 minutes (deep study)</option>
+          <option>45 minutes (intensive)</option>
+        </select>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-title">Email preview</div>
+        <div class="email-prev">
+          <div style="font-size:11px;color:#888;font-family:'DM Mono',monospace;margin-bottom:6px">FROM: lulu@thomasmore.be</div>
+          <div style="font-size:11px;color:#888;font-family:'DM Mono',monospace;margin-bottom:10px">TO: <span id="prev-email">your-email@thomasmore.be</span></div>
+          <div style="font-weight:700;font-size:13px;margin-bottom:6px">⏰ Time to study <span id="prev-lang">French</span>!</div>
+          <div style="font-size:12px;color:#ccc;line-height:1.7">Hey there! Your <span id="prev-len">20-minute</span> <span id="prev-lang2">French</span> session is ready.<br/>
+          📅 Scheduled: <span id="prev-days">Mon, Tue, Thu, Fri</span> at <span id="prev-time">08:00</span><br/>
+          Today's focus: vocabulary + grammar review<br/><br/>
+          <span style="color:var(--amber)">→ Click to start your session</span></div>
+        </div>
+      </div>
+      <button class="btn btn-sage btn-full" onclick="saveReminder()">Save reminder settings ✓</button>
+      <div id="rm-ok" style="display:none;text-align:center;font-size:13px;color:var(--sage);background:var(--sage-light);border-radius:8px;padding:10px;margin-top:8px">
+        ✓ Reminder saved! Check your email to confirm.
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- REMINDERS -->
-<div id="reminder" class="panel">
-  <div class="card">
-    <label>Your email address</label>
-    <input type="email" id="rm-email" placeholder="student@thomasmore.be"/>
-  </div>
-  <div class="card">
-    <label>Study days per week</label>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px" id="day-picker">
-      <button class="day-pill sel" data-day="Mon">Mon</button>
-      <button class="day-pill sel" data-day="Tue">Tue</button>
-      <button class="day-pill" data-day="Wed">Wed</button>
-      <button class="day-pill sel" data-day="Thu">Thu</button>
-      <button class="day-pill sel" data-day="Fri">Fri</button>
-      <button class="day-pill" data-day="Sat">Sat</button>
-      <button class="day-pill" data-day="Sun">Sun</button>
-    </div>
-    <div style="margin-top:8px;font-size:12px;color:var(--color-text-secondary)" id="day-count">4 days selected</div>
-  </div>
-  <div class="card">
-    <label>Reminder time</label>
-    <input type="time" id="rm-time" value="08:00" style="width:140px"/>
-  </div>
-  <div class="card">
-    <label>Language to focus on</label>
-    <select id="rm-lang" style="width:100%">
-      <option>French</option>
-      <option>Dutch</option>
-      <option>Spanish</option>
-      <option>All three</option>
-    </select>
-  </div>
-  <div class="reminder-preview" id="rm-preview">
-    <span class="green-dot"></span>
-    <strong>Preview:</strong> You'll receive reminders on <span id="rm-days-preview">Mon, Tue, Thu, Fri</span> at <span id="rm-time-preview">08:00</span> for <span id="rm-lang-preview">French</span>.
-  </div>
-  <button class="btn primary" style="width:100%" onclick="saveReminder()">Save reminder settings</button>
-  <div id="rm-success" style="display:none;text-align:center;font-size:13px;color:#065f46;background:#d1fae5;border-radius:var(--border-radius-md);padding:10px">
-    Reminder saved! You'll get an email at the times you chose.
-  </div>
+</main>
 </div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
 <script>
-let curLang='French', curCode='fr';
-let flashDeck=[], fcIdx=0, fcKnown=0, fcAgainCount=0, fcRevealed=false;
+// ── GLOBALS ──
+let curLang='French', curCode='fr', outputLang='English';
+let uploadedText='', uploadedFiles=[];
+let flashDeck=[], fcIdx=0, fcKnown=0, fcAgainCnt=0, fcFlipped=false;
 let quizQs=[], qzIdx=0, qzScore=0;
-let notesText='', notesQs=[], nqzIdx=0, nqzScore=0;
-let notesDeck=[], nfcIdx=0, nfcKnown=0, nfcAgain=0, nfcRevealed=false;
-let stats={sessions:0,streak:0,quizzes:0,correct:0,total:0,days:[0,0,0,0,0,0,0]};
+let notesQuizQs=[], nqIdx=0, nqScore=0;
+let notesFlashDeck=[], nfIdx=0;
+let stats={sessions:0,streak:1,quizzes:0,correct:0,total:0,xp:0,days:new Array(7).fill(0)};
+stats.days[new Date().getDay()]=1;
 
-function setLang(name,code,el){
-  curLang=name; curCode=code;
-  document.querySelectorAll('.ltab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
-  document.querySelectorAll('.cur-lang').forEach(e=>e.textContent=name);
-  const d=document.getElementById('dir');
-  d.options[0].text='English → '+name;
-  d.options[1].text=name+' → English';
+const LESSONS={
+  French:[
+    {id:'fr1',level:'beginner',title:'Greetings & Introductions',desc:'Learn how to say hello, goodbye, and introduce yourself.',icon:'👋',xp:50},
+    {id:'fr2',level:'beginner',title:'Numbers 1–20',desc:'Count from one to twenty in French.',icon:'🔢',xp:50},
+    {id:'fr3',level:'intermediate',title:'Être & Avoir',desc:'Master the two most important French verbs.',icon:'⚡',xp:100},
+    {id:'fr4',level:'intermediate',title:'Past Tense (Passé Composé)',desc:'Talk about what happened in the past.',icon:'🕰️',xp:100},
+    {id:'fr5',level:'advanced',title:'Subjunctive Mood',desc:'Express doubt, emotion, and wishes.',icon:'🧠',xp:150},
+  ],
+  Dutch:[
+    {id:'nl1',level:'beginner',title:'Hallo! Basic Dutch',desc:'Greetings, introductions, and polite phrases.',icon:'👋',xp:50},
+    {id:'nl2',level:'beginner',title:'De & Het articles',desc:'Understand the tricky Dutch article system.',icon:'📝',xp:50},
+    {id:'nl3',level:'intermediate',title:'Separable Verbs',desc:'Master Dutch separable and inseparable verbs.',icon:'🔗',xp:100},
+    {id:'nl4',level:'advanced',title:'Word Order Rules',desc:'Get Dutch sentence structure right every time.',icon:'🧩',xp:150},
+  ],
+  Spanish:[
+    {id:'es1',level:'beginner',title:'Hola! First Words',desc:'Essential greetings and introductions.',icon:'👋',xp:50},
+    {id:'es2',level:'beginner',title:'Ser vs Estar',desc:'When to use each verb for "to be".',icon:'⚖️',xp:75},
+    {id:'es3',level:'intermediate',title:'Preterite vs Imperfect',desc:'Past tense distinctions explained clearly.',icon:'🕰️',xp:100},
+    {id:'es4',level:'advanced',title:'Subjunctivo',desc:'Express feelings, doubts, and recommendations.',icon:'🎭',xp:150},
+  ]
+};
+
+// ── UTILS ──
+function toast(msg,dur=3000){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),dur);
 }
 
 function showPanel(id,el){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  el.classList.add('active');
+  if(el) el.classList.add('active');
   if(id==='progress') renderProgress();
+  if(id==='teacher') renderLessons();
 }
 
-function resetOut(inp,out,msg){
-  document.getElementById(inp).value='';
-  const o=document.getElementById(out);
-  o.textContent=msg; o.classList.add('empty');
+function resetResult(id,msg){
+  const el=document.getElementById(id);
+  el.textContent=msg; el.classList.add('empty');
 }
 
-async function callClaude(prompt, outId, loadMsg){
+// ── LANGUAGE ──
+function setLang(name,code,el){
+  curLang=name; curCode=code;
+  document.querySelectorAll('.lbtn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.cur-lang').forEach(e=>e.textContent=name);
+  document.getElementById('sb-lang').textContent='Studying: '+name;
+  const d=document.getElementById('tr-dir');
+  d.options[0].text='English → '+name;
+  d.options[1].text=name+' → English';
+  renderLessons();
+  toast('Switched to '+name);
+}
+
+function setOutputLang(lang,el){
+  outputLang=lang;
+  document.querySelectorAll('[onclick^="setOutputLang"]').forEach(b=>b.className='btn btn-sm');
+  el.className='btn btn-sage btn-sm';
+  document.getElementById('out-lang-display').textContent=lang;
+}
+
+// ── CLAUDE API ──
+async function callClaude(prompt,outId,loadMsg){
   const out=document.getElementById(outId);
   out.classList.remove('empty');
   out.innerHTML='<span class="spinner"></span>'+loadMsg;
+  out.style.display='block';
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:prompt}]})
+    });
     const d=await r.json();
-    out.textContent=d.content?.[0]?.text||'No response.';
+    const text=d.content?.[0]?.text||'No response.';
+    out.textContent=text;
     recordSession();
-  }catch(e){out.textContent='Error: '+e.message;}
+    return text;
+  }catch(e){out.textContent='Error: '+e.message; return '';}
 }
 
 async function callClaudeRaw(prompt){
-  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,messages:[{role:'user',content:prompt}]})});
+  const r=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:prompt}]})
+  });
   const d=await r.json();
   return d.content?.[0]?.text||'';
 }
 
-function recordSession(){
-  stats.sessions++;
-  const day=new Date().getDay();
-  stats.days[day]=1;
-  stats.streak=stats.days.filter(Boolean).length;
-}
-
+// ── TRANSLATE ──
 function doTranslate(){
-  const t=document.getElementById('tr-input').value.trim(); if(!t) return;
-  const dir=document.getElementById('dir').value;
+  const t=document.getElementById('tr-in').value.trim(); if(!t) return;
+  const dir=document.getElementById('tr-dir').value;
   const from=dir==='en2tgt'?'English':curLang, to=dir==='en2tgt'?curLang:'English';
-  callClaude(`Translate from ${from} to ${to}. Reply with ONLY the translation:\n"${t}"`,'tr-out','Translating…');
+  callClaude(`Translate from ${from} to ${to}. Reply with ONLY the translation, nothing else:\n"${t}"`,'tr-out','Translating…');
 }
 
+// ── GRAMMAR ──
 function doGrammar(){
-  const t=document.getElementById('gr-input').value.trim(); if(!t) return;
-  callClaude(`You are a ${curLang} tutor. Check this sentence for grammar errors:\n"${t}"\n\n1. Is it correct or does it have errors?\n2. Corrected sentence if needed\n3. Clear explanation of each rule\n\nPlain text, no markdown.`,'gr-out','Checking…');
+  const t=document.getElementById('gr-in').value.trim(); if(!t) return;
+  callClaude(`You are a ${curLang} language tutor. Check this sentence:\n"${t}"\n\n1. Is it correct or does it have errors?\n2. Corrected sentence (if needed)\n3. Explanation of each grammar rule\n\nPlain text, friendly tone, no markdown symbols.`,'gr-out','Checking grammar…');
 }
 
+// ── VOCABULARY ──
 function doVocab(){
-  const w=document.getElementById('vc-input').value.trim(); if(!w) return;
-  callClaude(`You are a ${curLang} tutor. For "${w}" provide:\n1. English translation(s)\n2. Part of speech\n3. Two example sentences with translations\n4. If verb: present tense conjugation for all persons\n\nPlain text, concise.`,'vc-out','Looking up…');
+  const w=document.getElementById('vc-in').value.trim(); if(!w) return;
+  callClaude(`${curLang} tutor. For the word "${w}" provide:\n1. Translation(s) to English\n2. Part of speech\n3. Two example sentences in ${curLang} with English translations\n4. Full present tense conjugation (if verb)\n\nPlain text, concise.`,'vc-out','Looking up…');
 }
 
+// ── FILE UPLOAD ──
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('dz').classList.remove('over');
+  handleFiles(e.dataTransfer.files);
+}
+
+async function handleFiles(files){
+  for(const file of files){
+    await processFile(file);
+  }
+}
+
+async function processFile(file){
+  let text='';
+  const dz=document.getElementById('dz');
+  dz.innerHTML='<div class="drop-icon"><span class="spinner"></span></div><div class="drop-text">Reading '+file.name+'…</div>';
+
+  if(file.type==='application/pdf'){
+    try{
+      const ab=await file.arrayBuffer();
+      const pdf=await pdfjsLib.getDocument({data:ab}).promise;
+      let pages=[];
+      for(let i=1;i<=Math.min(pdf.numPages,20);i++){
+        const page=await pdf.getPage(i);
+        const content=await page.getTextContent();
+        pages.push(content.items.map(s=>s.str).join(' '));
+      }
+      text=pages.join('\n');
+    }catch(e){ text='[PDF: '+file.name+']'; }
+  } else {
+    text=await file.text();
+  }
+
+  uploadedText=(uploadedText?uploadedText+'\n\n---\n\n':'')+`FILE: ${file.name}\n${text.slice(0,4000)}`;
+  uploadedFiles.push(file.name);
+
+  // add chip
+  const chips=document.getElementById('source-chips');
+  const chip=document.createElement('div');
+  chip.className='chip';
+  chip.innerHTML=`📄 ${file.name} <button class="chip-rm" onclick="removeSource('${file.name}',this.parentElement)">✕</button>`;
+  chips.appendChild(chip);
+
+  // sidebar
+  updateSidebarSources();
+
+  dz.innerHTML='<div class="drop-icon">📄</div><div class="drop-text">Drop more files or click to add</div><div class="drop-sub">PDF, TXT, PPTX supported</div>';
+  document.getElementById('studio-result-card').style.display='block';
+  toast('✓ '+file.name+' loaded');
+}
+
+function removeSource(name,chip){
+  chip.remove();
+  uploadedFiles=uploadedFiles.filter(f=>f!==name);
+  updateSidebarSources();
+  if(!uploadedFiles.length){uploadedText=''; document.getElementById('studio-result-card').style.display='none';}
+}
+
+function updateSidebarSources(){
+  const sb=document.getElementById('sb-sources');
+  if(!uploadedFiles.length){sb.innerHTML='<div style="font-size:11px;color:#333;font-style:italic">No sources yet</div>';return;}
+  sb.innerHTML=uploadedFiles.map(f=>`<div class="source-item"><div class="source-title">${f}</div><div class="source-meta">uploaded</div></div>`).join('');
+}
+
+// ── STUDIO GENERATE ──
+async function generateAction(type){
+  if(!uploadedText){toast('⚠️ Upload a file first');return;}
+  const card=document.getElementById('studio-result-card');
+  card.style.display='block';
+  switchNotesTab(type,document.querySelector(`.notes-tab[onclick*="${type}"]`)||document.querySelector('.notes-tab'));
+
+  if(type==='summary'){
+    callClaude(`Summarise these lecture notes clearly in ${outputLang}. Use numbered sections and be concise:\n\n${uploadedText}`,'summary-out','Summarising in '+outputLang+'…');
+  } else if(type==='quiz'){
+    await generateNotesQuiz();
+  } else if(type==='flashcards'){
+    await generateNotesFlashcards();
+  } else if(type==='keyterms'){
+    callClaude(`Extract 10 key terms or concepts from these notes. For each: term, definition in ${outputLang}, and one example. Use plain text, numbered list:\n\n${uploadedText}`,'keyterms-out','Extracting key terms…');
+  }
+}
+
+async function generateNotesQuiz(){
+  const area=document.getElementById('notes-quiz');
+  area.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px"><span class="spinner"></span>Generating quiz from your notes…</div>';
+  try{
+    const raw=await callClaudeRaw(`Create 5 multiple-choice quiz questions from these notes. Questions in ${outputLang}. JSON array only, no markdown:\n[{"question":"...","options":["A","B","C","D"],"correct":0,"explanation":"..."}]\n\nNOTES:\n${uploadedText}`);
+    notesQuizQs=JSON.parse(raw.replace(/\`\`\`json|\`\`\`/g,'').trim());
+    nqIdx=0; nqScore=0;
+    renderNotesQuiz();
+    recordSession();
+  }catch(e){area.innerHTML='<div style="padding:16px;color:var(--rose)">Could not generate quiz. Try again.</div>';}
+}
+
+function renderNotesQuiz(){
+  const area=document.getElementById('notes-quiz'); area.innerHTML='';
+  if(nqIdx>=notesQuizQs.length){
+    stats.quizzes++;
+    area.innerHTML=`<div class="card" style="text-align:center;padding:24px"><div style="font-size:28px;margin-bottom:8px">🎉</div><div style="font-size:20px;font-weight:700;color:var(--sage)">${nqScore}/${notesQuizQs.length}</div><div style="font-size:13px;color:var(--muted);margin:8px 0 16px">Quiz complete!</div><button class="btn btn-sage" onclick="generateAction('quiz')">Retry</button></div>`;
+    return;
+  }
+  const q=notesQuizQs[nqIdx];
+  const progPct=((nqIdx+1)/notesQuizQs.length*100);
+  const opts=q.options.map((o,i)=>`<button class="quiz-opt" onclick="answerNQ(${i},this)">${o}</button>`).join('');
+  area.innerHTML=`
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px"><span>Q${nqIdx+1} of ${notesQuizQs.length}</span><span style="color:var(--sage);font-weight:700">${nqScore} pts</span></div>
+    <div class="prog-bar"><div class="prog-fill" style="width:${progPct}%"></div></div>
+    <div class="quiz-q">${q.question}</div>
+    ${opts}
+    <div class="quiz-explain" id="nq-ex"></div>
+    <button class="btn btn-amber" id="nq-next" style="display:none;margin-top:10px" onclick="nqIdx++;renderNotesQuiz()">Next →</button>`;
+}
+
+function answerNQ(i,btn){
+  const q=notesQuizQs[nqIdx];
+  document.querySelectorAll('#notes-quiz .quiz-opt').forEach(b=>b.disabled=true);
+  if(i===q.correct){btn.classList.add('correct');nqScore++;stats.correct++;}
+  else{btn.classList.add('wrong');document.querySelectorAll('#notes-quiz .quiz-opt')[q.correct].classList.add('correct');}
+  stats.total++;
+  document.getElementById('nq-ex').textContent=q.explanation;
+  document.getElementById('nq-ex').style.display='block';
+  document.getElementById('nq-next').style.display='inline-flex';
+}
+
+async function generateNotesFlashcards(){
+  const area=document.getElementById('notes-flashcards');
+  area.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px"><span class="spinner"></span>Making flashcards from your notes…</div>';
+  try{
+    const raw=await callClaudeRaw(`Extract 8 key vocabulary or concepts from these notes as flashcards. JSON array only, no markdown:\n[{"word":"term","translation":"English definition or translation","example":"usage example"}]\n\nNOTES:\n${uploadedText}`);
+    notesFlashDeck=JSON.parse(raw.replace(/\`\`\`json|\`\`\`/g,'').trim());
+    nfIdx=0; let nfKnown=0, nfAgain=0;
+    renderNotesFlash();
+    recordSession();
+  }catch(e){area.innerHTML='<div style="padding:16px;color:var(--rose)">Could not generate flashcards.</div>';}
+}
+
+function renderNotesFlash(){
+  const area=document.getElementById('notes-flashcards');
+  if(nfIdx>=notesFlashDeck.length){area.innerHTML=`<div class="card" style="text-align:center;padding:24px"><div style="font-size:20px;font-weight:700;color:var(--sage)">Deck complete!</div><button class="btn btn-sage" style="margin-top:12px" onclick="generateAction('flashcards')">Retry</button></div>`;return;}
+  const c=notesFlashDeck[nfIdx];
+  area.innerHTML=`
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;text-align:center">${nfIdx+1} of ${notesFlashDeck.length} cards</div>
+    <div class="flash-scene">
+      <div class="flash-card" id="nf-card" onclick="flipNotesFlash()">
+        <div class="flash-front"><div class="flash-word">${c.word}</div><div class="flash-hint">tap to flip</div></div>
+        <div class="flash-back"><div class="flash-word" style="font-size:18px">${c.translation}</div><div class="flash-hint">${c.example||''}</div></div>
+      </div>
+    </div>
+    <div class="flash-btns">
+      <button class="btn" style="background:var(--rose-light);border-color:var(--rose);color:var(--rose)" onclick="nfIdx++;renderNotesFlash()">Again</button>
+      <button class="btn" style="background:var(--sage-light);border-color:var(--sage);color:var(--sage)" onclick="nfIdx++;renderNotesFlash()">Got it ✓</button>
+    </div>`;
+}
+
+function flipNotesFlash(){
+  const c=document.getElementById('nf-card');
+  if(c) c.classList.toggle('flipped');
+}
+
+function switchNotesTab(tab,el){
+  document.querySelectorAll('.notes-tab').forEach(t=>t.classList.remove('active'));
+  if(el) el.classList.add('active');
+  else{
+    const tabs=document.querySelectorAll('.notes-tab');
+    const map={summary:0,quiz:1,flashcards:2,keyterms:3};
+    if(tabs[map[tab]]) tabs[map[tab]].classList.add('active');
+  }
+  ['summary','quiz','flashcards','keyterms'].forEach(t=>{
+    const el=document.getElementById('notes-'+t);
+    if(el) el.style.display=t===tab?'block':'none';
+  });
+}
+
+async function askAboutNotes(){
+  const q=document.getElementById('notes-q').value.trim(); if(!q) return;
+  const out=document.getElementById('notes-ask-out');
+  out.style.display='block';
+  const ctx=uploadedText||'[No notes uploaded yet — answer generally]';
+  await callClaude(`You are Lulu, a ${curLang} language tutor. The student asks: "${q}"\n\nContext from their notes:\n${ctx}\n\nAnswer helpfully in ${outputLang}, plain text.`,'notes-ask-out','Thinking…');
+}
+
+// ── FLASHCARDS ──
 async function loadFlashcards(){
   const topic=document.getElementById('fc-topic').value.trim()||'common vocabulary';
   document.getElementById('fc-loading').style.display='block';
   document.getElementById('fc-area').style.display='none';
-  fcIdx=0; fcKnown=0; fcAgainCount=0; fcRevealed=false;
+  fcIdx=0; fcKnown=0; fcAgainCnt=0; fcFlipped=false;
   document.getElementById('fc-known').textContent='0';
   document.getElementById('fc-again').textContent='0';
   try{
-    const raw=await callClaudeRaw(`Generate 8 ${curLang} flashcards on "${topic}". JSON array only, no markdown:\n[{"word":"${curLang} word","translation":"English","example":"short example in ${curLang}"}]`);
+    const raw=await callClaudeRaw(`Generate 8 ${curLang} flashcards on "${topic}". JSON array only, no markdown:\n[{"word":"${curLang} word or phrase","translation":"English translation","example":"short example sentence","pos":"noun/verb/etc"}]`);
     flashDeck=JSON.parse(raw.replace(/\`\`\`json|\`\`\`/g,'').trim());
     document.getElementById('fc-left').textContent=flashDeck.length;
-    document.getElementById('fc-area').style.display='flex';
-    showFlashcard(); recordSession();
-  }catch(e){document.getElementById('fc-loading').innerHTML='Error generating cards.';}
+    showFlashcard();
+    document.getElementById('fc-area').style.display='block';
+    recordSession(); stats.xp+=10;
+    toast('Deck generated: '+flashDeck.length+' cards');
+  }catch(e){toast('Error generating cards');}
   document.getElementById('fc-loading').style.display='none';
 }
 
 function showFlashcard(){
-  fcRevealed=false;
-  if(fcIdx>=flashDeck.length){document.getElementById('fc-word').textContent='Done!';document.getElementById('fc-hint').textContent='All cards reviewed';return;}
-  document.getElementById('fc-word').textContent=flashDeck[fcIdx].word;
-  document.getElementById('fc-hint').textContent='tap to reveal';
+  fcFlipped=false;
+  const card=document.getElementById('fc-card');
+  card.classList.remove('flipped');
+  if(fcIdx>=flashDeck.length){
+    document.getElementById('fc-word').textContent='Done!';
+    document.getElementById('fc-pos').textContent='All cards reviewed';
+    return;
+  }
+  const c=flashDeck[fcIdx];
+  document.getElementById('fc-word').textContent=c.word;
+  document.getElementById('fc-pos').textContent=(c.pos||'word')+' · tap to flip';
+  document.getElementById('fc-trans').textContent=c.translation;
+  document.getElementById('fc-ex').textContent=c.example||'';
   document.getElementById('fc-left').textContent=flashDeck.length-fcIdx;
 }
 
-function revealFlash(){
-  if(fcRevealed||fcIdx>=flashDeck.length) return;
-  const c=flashDeck[fcIdx];
-  document.getElementById('fc-hint').textContent=c.translation+(c.example?' — "'+c.example+'"':'');
-  fcRevealed=true;
+function flipFlash(){
+  const card=document.getElementById('fc-card');
+  card.classList.toggle('flipped');
+  fcFlipped=!fcFlipped;
 }
 
 function rateFlash(r){
-  if(r==='ok') fcKnown++; else fcAgainCount++;
+  if(r==='ok'){fcKnown++;stats.xp+=5;}else{fcAgainCnt++;}
   fcIdx++;
   document.getElementById('fc-known').textContent=fcKnown;
-  document.getElementById('fc-again').textContent=fcAgainCount;
+  document.getElementById('fc-again').textContent=fcAgainCnt;
   showFlashcard();
 }
 
+// ── QUIZ ──
 async function startQuiz(){
-  const topic=document.getElementById('qz-topic').value.trim()||'general vocabulary';
-  document.getElementById('qz-err').style.display='none';
-  const btn=event.target; btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Generating…';
+  const topic=document.getElementById('qz-topic').value.trim()||'general vocabulary and grammar';
+  const btn=document.getElementById('qz-start-btn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Generating…';
   qzIdx=0; qzScore=0;
   try{
-    const raw=await callClaudeRaw(`5 multiple-choice quiz questions for ${curLang} learners on "${topic}". JSON array only, no markdown:\n[{"question":"...","options":["A","B","C","D"],"correct":0,"explanation":"..."}]`);
+    const raw=await callClaudeRaw(`5 multiple-choice quiz questions for ${curLang} learners on "${topic}". JSON array only, no markdown:\n[{"question":"...","options":["A","B","C","D"],"correct":0,"explanation":"brief explanation in English"}]`);
     quizQs=JSON.parse(raw.replace(/\`\`\`json|\`\`\`/g,'').trim());
     document.getElementById('qz-area').style.display='flex';
-    showQuestion(); recordSession();
-  }catch(e){
-    document.getElementById('qz-err').textContent='Could not generate quiz. Try again.';
-    document.getElementById('qz-err').style.display='block';
-  }
+    document.getElementById('qz-area').style.flexDirection='column';
+    showQzQ(); recordSession();
+  }catch(e){toast('Error generating quiz');}
   btn.disabled=false; btn.textContent='Start quiz';
 }
 
-function showQuestion(){
+function showQzQ(){
   const q=quizQs[qzIdx];
   document.getElementById('qz-q').textContent=q.question;
-  document.getElementById('qz-prog').textContent='Question '+(qzIdx+1)+' of '+quizQs.length;
+  document.getElementById('qz-prog').textContent='Q'+(qzIdx+1)+' of '+quizQs.length;
   document.getElementById('qz-bar').style.width=((qzIdx+1)/quizQs.length*100)+'%';
-  document.getElementById('qz-sc').textContent='Score: '+qzScore;
+  document.getElementById('qz-sc').textContent=qzScore+' pts';
   document.getElementById('qz-explain').style.display='none';
   document.getElementById('qz-next').style.display='none';
   const opts=document.getElementById('qz-opts'); opts.innerHTML='';
-  q.options.forEach((opt,i)=>{
+  q.options.forEach((o,i)=>{
     const b=document.createElement('button');
-    b.className='quiz-opt'; b.textContent=opt;
-    b.onclick=()=>answerQ(i,b,'qz-opts','qz-explain','qz-next',q);
+    b.className='quiz-opt'; b.textContent=o;
+    b.onclick=()=>{
+      document.querySelectorAll('.quiz-opt').forEach(x=>x.disabled=true);
+      if(i===q.correct){b.classList.add('correct');qzScore++;stats.correct++;}
+      else{b.classList.add('wrong');document.querySelectorAll('.quiz-opt')[q.correct].classList.add('correct');}
+      stats.total++;
+      document.getElementById('qz-explain').textContent=q.explanation;
+      document.getElementById('qz-explain').style.display='block';
+      document.getElementById('qz-next').style.display='inline-flex';
+      document.getElementById('qz-sc').textContent=qzScore+' pts';
+    };
     opts.appendChild(b);
   });
 }
 
-function answerQ(chosen,btn,optsId,explainId,nextId,q){
-  document.getElementById(optsId).querySelectorAll('.quiz-opt').forEach(b=>b.disabled=true);
-  if(chosen===q.correct){btn.classList.add('correct');qzScore++;stats.correct++;}
-  else{btn.classList.add('wrong');document.getElementById(optsId).querySelectorAll('.quiz-opt')[q.correct].classList.add('correct');}
-  stats.total++;
-  document.getElementById(explainId).textContent=q.explanation;
-  document.getElementById(explainId).style.display='block';
-  document.getElementById(nextId).style.display='block';
-  document.getElementById('qz-sc').textContent='Score: '+qzScore;
-}
-
-function nextQuestion(){
+function nextQzQ(){
   qzIdx++;
   if(qzIdx>=quizQs.length){
+    stats.quizzes++; stats.xp+=qzScore*10;
     document.getElementById('qz-area').style.display='none';
     document.getElementById('qz-done').style.display='block';
+    const pct=Math.round(qzScore/quizQs.length*100);
     document.getElementById('qz-final').textContent=qzScore+' / '+quizQs.length;
-    stats.quizzes++;
-    if(qzScore===quizQs.length) addBadge('Perfect score!','badge-green');
-  } else showQuestion();
+    document.getElementById('qz-msg').textContent=pct===100?'Perfect score! 🏆':pct>=80?'Great job!':pct>=60?'Good effort — keep practising!':'Keep studying — you\'ll get there!';
+    document.getElementById('qz-emoji').textContent=pct===100?'🏆':pct>=80?'🎉':pct>=60?'👍':'💪';
+    if(pct===100) addBadge('badge-amber','🏆 Perfect score!');
+  } else showQzQ();
 }
 
 function resetQuiz(){
@@ -495,133 +1059,73 @@ function resetQuiz(){
   document.getElementById('qz-area').style.display='none';
 }
 
-function handleDrop(e){
-  e.preventDefault();
-  document.getElementById('drop-zone').classList.remove('dragover');
-  const file=e.dataTransfer.files[0];
-  if(file) processFile(file);
+// ── LESSONS ──
+function renderLessons(filter='all'){
+  const grid=document.getElementById('lessons-grid');
+  const list=(LESSONS[curLang]||LESSONS.French).filter(l=>filter==='all'||l.level===filter);
+  grid.innerHTML=list.map(l=>`
+    <div class="lesson-card" onclick="startLesson('${l.id}')">
+      <div class="lesson-level badge ${l.level==='beginner'?'badge-sage':l.level==='intermediate'?'badge-amber':'badge-rose'}">${l.icon} ${l.level}</div>
+      <div class="lesson-title">${l.title}</div>
+      <div class="lesson-desc">${l.desc}</div>
+      <div class="lesson-meta"><span>⚡ ${l.xp} XP</span><span>🕐 ~15 min</span></div>
+    </div>`).join('');
 }
 
-function handleFile(file){
-  if(file) processFile(file);
+function filterLessons(f,el){
+  document.querySelectorAll('#lesson-filters .btn').forEach(b=>b.className='btn');
+  el.className='btn btn-sage';
+  renderLessons(f);
 }
 
-function processFile(file){
-  document.getElementById('file-name').style.display='block';
-  document.getElementById('file-name').textContent='Loaded: '+file.name;
-  document.getElementById('notes-actions').style.display='block';
-  document.getElementById('notes-out-card').style.display='none';
-  document.getElementById('notes-quiz-area').style.display='none';
-  document.getElementById('notes-fc-area').style.display='none';
-
-  if(file.type==='application/pdf'){
-    notesText='[PDF content from: '+file.name+'] The student has uploaded lecture notes about language learning topics including vocabulary, grammar rules, verb conjugations, and sentence structure.';
-  } else {
-    const reader=new FileReader();
-    reader.onload=e=>{ notesText=e.target.result.slice(0,3000); };
-    reader.readAsText(file);
-  }
+async function startLesson(id){
+  const all=[...LESSONS.French,...LESSONS.Dutch,...LESSONS.Spanish];
+  const lesson=all.find(l=>l.id===id); if(!lesson) return;
+  document.getElementById('lessons-grid').style.display='none';
+  document.getElementById('lesson-filters').style.display='none';
+  const la=document.getElementById('lesson-active');
+  la.style.display='block';
+  document.getElementById('lesson-active-title').textContent=lesson.icon+' '+lesson.title;
+  const content=document.getElementById('lesson-content');
+  content.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted)"><span class="spinner"></span> Lulu is preparing your lesson…</div>';
+  document.getElementById('lesson-prog').style.width='30%';
+  const raw=await callClaudeRaw(`You are Lulu, a friendly ${curLang} language teacher. Create an interactive lesson on "${lesson.title}" for a ${lesson.level} student. Structure it as:\n\n1. INTRO (2-3 sentences explaining the topic)\n2. KEY RULES (3-4 bullet points)\n3. EXAMPLES (4 example sentences with translations)\n4. PRACTICE TIP (one actionable tip)\n\nBe friendly, clear, and educational. Plain text only.`);
+  content.innerHTML='<div style="white-space:pre-wrap;font-size:13px;line-height:1.9;color:var(--ink)">'+raw+'</div><div style="margin-top:20px;display:flex;gap:8px"><button class="btn btn-amber" onclick="quizAfterLesson(\''+lesson.title+'\')">🎯 Quiz me on this</button><button class="btn" onclick="closeLessonActive()">← Back to lessons</button></div>';
+  document.getElementById('lesson-prog').style.width='100%';
+  stats.xp+=lesson.xp; recordSession();
+  toast('✓ +'+lesson.xp+' XP earned!');
 }
 
-async function generateFromNotes(mode){
-  if(!notesText){alert('Please upload a file first.');return;}
-  document.getElementById('notes-out-card').style.display='none';
-  document.getElementById('notes-quiz-area').style.display='none';
-  document.getElementById('notes-fc-area').style.display='none';
-  document.getElementById('notes-loading').style.display='block';
-
-  if(mode==='summary'){
-    document.getElementById('notes-loading-msg').textContent='Summarising notes…';
-    try{
-      const raw=await callClaudeRaw(`You are a ${curLang} language tutor. Summarise these lecture notes for a student studying ${curLang}. Be clear and structured. Use plain text.\n\nNOTES:\n${notesText}`);
-      document.getElementById('notes-out-label').textContent='Summary';
-      document.getElementById('notes-out').textContent=raw;
-      document.getElementById('notes-out-card').style.display='block';
-      recordSession();
-    }catch(e){alert('Error: '+e.message);}
-  } else if(mode==='quiz'){
-    document.getElementById('notes-loading-msg').textContent='Generating quiz from notes…';
-    try{
-      const raw=await callClaudeRaw(`Create 5 multiple-choice questions based on these ${curLang} lecture notes. JSON array only, no markdown:\n[{"question":"...","options":["A","B","C","D"],"correct":0,"explanation":"..."}]\n\nNOTES:\n${notesText}`);
-      notesQs=JSON.parse(raw.replace(/\`\`\`json|\`\`\`/g,'').trim());
-      nqzIdx=0; nqzScore=0;
-      document.getElementById('notes-quiz-area').style.display='flex';
-      showNotesQuestion(); recordSession();
-    }catch(e){alert('Error generating quiz.');}
-  } else if(mode==='flashcards'){
-    document.getElementById('notes-loading-msg').textContent='Making flashcards from notes…';
-    try{
-      const raw=await callClaudeRaw(`Extract 8 key vocabulary items or concepts from these ${curLang} lecture notes and make flashcards. JSON array only, no markdown:\n[{"word":"term or concept","translation":"English explanation","example":"usage or context"}]\n\nNOTES:\n${notesText}`);
-      notesDeck=JSON.parse(raw.replace(/\`\`\`json|\`\`\`/g,'').trim());
-      nfcIdx=0; nfcKnown=0; nfcAgain=0; nfcRevealed=false;
-      document.getElementById('nfc-left').textContent=notesDeck.length;
-      document.getElementById('nfc-known').textContent='0';
-      document.getElementById('nfc-again').textContent='0';
-      document.getElementById('notes-fc-area').style.display='flex';
-      showNotesFlash(); recordSession();
-    }catch(e){alert('Error generating flashcards.');}
-  }
-  document.getElementById('notes-loading').style.display='none';
+function quizAfterLesson(title){
+  document.getElementById('qz-topic').value=title;
+  showPanel('quiz',null);
+  document.querySelectorAll('.nav-item').forEach(n=>{if(n.textContent.includes('Quiz'))n.classList.add('active');else n.classList.remove('active');});
+  startQuiz();
 }
 
-function showNotesQuestion(){
-  const q=notesQs[nqzIdx];
-  document.getElementById('nqz-q').textContent=q.question;
-  document.getElementById('nqz-prog').textContent='Question '+(nqzIdx+1)+' of '+notesQs.length;
-  document.getElementById('nqz-bar').style.width=((nqzIdx+1)/notesQs.length*100)+'%';
-  document.getElementById('nqz-sc').textContent='Score: '+nqzScore;
-  document.getElementById('nqz-explain').style.display='none';
-  document.getElementById('nqz-next').style.display='none';
-  const opts=document.getElementById('nqz-opts'); opts.innerHTML='';
-  q.options.forEach((opt,i)=>{
-    const b=document.createElement('button');
-    b.className='quiz-opt'; b.textContent=opt;
-    b.onclick=()=>{
-      document.getElementById('nqz-opts').querySelectorAll('.quiz-opt').forEach(x=>x.disabled=true);
-      if(i===q.correct){b.classList.add('correct');nqzScore++;stats.correct++;}
-      else{b.classList.add('wrong');document.getElementById('nqz-opts').querySelectorAll('.quiz-opt')[q.correct].classList.add('correct');}
-      stats.total++;
-      document.getElementById('nqz-explain').textContent=q.explanation;
-      document.getElementById('nqz-explain').style.display='block';
-      document.getElementById('nqz-next').style.display='block';
-      document.getElementById('nqz-sc').textContent='Score: '+nqzScore;
-    };
-    opts.appendChild(b);
-  });
+function closeLessonActive(){
+  document.getElementById('lesson-active').style.display='none';
+  document.getElementById('lessons-grid').style.display='block';
+  document.getElementById('lesson-filters').style.display='flex';
 }
 
-function nextNotesQuestion(){
-  nqzIdx++;
-  if(nqzIdx>=notesQs.length){
-    stats.quizzes++;
-    document.getElementById('notes-quiz-area').style.display='none';
-    document.getElementById('notes-out-label').textContent='Quiz result';
-    document.getElementById('notes-out').textContent='Quiz complete! You scored '+nqzScore+' out of '+notesQs.length+'.';
-    document.getElementById('notes-out-card').style.display='block';
-  } else showNotesQuestion();
+// ── PROGRESS ──
+function recordSession(){
+  stats.sessions++;
+  stats.days[new Date().getDay()]=1;
+  stats.streak=stats.days.filter(Boolean).length;
+  if(stats.sessions===5) addBadge('badge-sky','⭐ 5 sessions');
+  if(stats.quizzes===3) addBadge('badge-amber','🎯 Quiz master');
+  if(stats.xp>=100) addBadge('badge-sage','⚡ 100 XP');
 }
 
-function showNotesFlash(){
-  nfcRevealed=false;
-  if(nfcIdx>=notesDeck.length){document.getElementById('nfc-word').textContent='Done!';document.getElementById('nfc-hint').textContent='All cards reviewed';return;}
-  document.getElementById('nfc-word').textContent=notesDeck[nfcIdx].word;
-  document.getElementById('nfc-hint').textContent='tap to reveal';
-  document.getElementById('nfc-left').textContent=notesDeck.length-nfcIdx;
-}
-
-function revealNotesFlash(){
-  if(nfcRevealed||nfcIdx>=notesDeck.length) return;
-  const c=notesDeck[nfcIdx];
-  document.getElementById('nfc-hint').textContent=c.translation+(c.example?' — '+c.example:'');
-  nfcRevealed=true;
-}
-
-function rateNotesFlash(r){
-  if(r==='ok') nfcKnown++; else nfcAgain++;
-  nfcIdx++;
-  document.getElementById('nfc-known').textContent=nfcKnown;
-  document.getElementById('nfc-again').textContent=nfcAgain;
-  showNotesFlash();
+function addBadge(cls,text){
+  const area=document.getElementById('pg-badges');
+  if(!area) return;
+  if([...area.querySelectorAll('.badge')].some(b=>b.textContent===text)) return;
+  const b=document.createElement('span');
+  b.className='badge '+cls; b.textContent=text;
+  area.appendChild(b);
 }
 
 function renderProgress(){
@@ -629,62 +1133,70 @@ function renderProgress(){
   document.getElementById('pg-streak').textContent=stats.streak;
   document.getElementById('pg-quizzes').textContent=stats.quizzes;
   const acc=stats.total>0?Math.round(stats.correct/stats.total*100):0;
-  document.getElementById('pg-acc-bar').style.width=acc+'%';
-  document.getElementById('pg-acc-txt').textContent=acc+'% ('+stats.correct+'/'+stats.total+' correct)';
-  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const today=new Date().getDay();
-  const area=document.getElementById('pg-activity'); area.innerHTML='';
+  document.getElementById('pg-acc').textContent=acc+'%';
+  const xpPct=Math.min(stats.xp/500*100,100);
+  document.getElementById('pg-xp-bar').style.width=xpPct+'%';
+  document.getElementById('pg-xp-txt').textContent=stats.xp+' XP';
+  document.getElementById('pg-next-level').textContent=stats.xp>=500?'Max level reached! 🏆':'Next level at 500 XP ('+stats.xp+'/500)';
+  const days=['S','M','T','W','T','F','S'];
+  const hm=document.getElementById('pg-heatmap'); hm.innerHTML='';
   days.forEach((d,i)=>{
-    const dot=document.createElement('div');
-    dot.className='act-dot';
-    const studied=stats.days[i];
-    dot.style.background=studied?'#d1fae5':i===today?'#fef3c7':'var(--color-background-secondary)';
-    dot.style.color=studied?'#065f46':i===today?'#92400e':'var(--color-text-tertiary)';
-    dot.style.border='0.5px solid '+(studied?'#6ee7b7':i===today?'#fcd34d':'var(--color-border-tertiary)');
-    dot.textContent=d[0];
-    area.appendChild(dot);
+    const c=document.createElement('div');
+    c.className='hm-cell'; c.textContent=d;
+    c.style.background=stats.days[i]?'#d1fae5':'var(--border)';
+    c.style.color=stats.days[i]?'#065f46':'var(--muted)';
+    c.title=stats.days[i]?'Studied':'Not yet';
+    hm.appendChild(c);
   });
-  if(stats.sessions>=5) addBadge('5 sessions','badge-blue');
-  if(stats.quizzes>=3) addBadge('Quiz master','badge-green');
 }
 
-function addBadge(text,cls){
-  const area=document.getElementById('pg-badges');
-  if([...area.querySelectorAll('span')].some(s=>s.textContent===text)) return;
-  const b=document.createElement('span');
-  b.className='badge '+cls; b.textContent=text;
-  area.appendChild(b);
-}
-
-function resetProgress(){
-  stats={sessions:0,streak:0,quizzes:0,correct:0,total:0,days:[0,0,0,0,0,0,0]};
+function resetStats(){
+  stats={sessions:0,streak:0,quizzes:0,correct:0,total:0,xp:0,days:new Array(7).fill(0)};
   renderProgress();
+  document.getElementById('pg-badges').innerHTML='<span class="badge badge-sage">🌱 First session</span>';
+  toast('Progress reset');
 }
 
-document.querySelectorAll('.day-pill').forEach(p=>{
+// ── REMINDERS ──
+document.querySelectorAll('.dpill').forEach(p=>{
   p.onclick=function(){
     this.classList.toggle('sel');
-    const sel=[...document.querySelectorAll('.day-pill.sel')].map(x=>x.dataset.day);
+    const sel=[...document.querySelectorAll('.dpill.sel')].map(x=>x.dataset.day);
     document.getElementById('day-count').textContent=sel.length+' day'+(sel.length!==1?'s':'')+' selected';
-    document.getElementById('rm-days-preview').textContent=sel.join(', ')||'none';
+    document.getElementById('prev-days').textContent=sel.join(', ')||'none';
   };
 });
 
-document.getElementById('rm-time').addEventListener('input',function(){
-  document.getElementById('rm-time-preview').textContent=this.value;
+document.getElementById('rm-email').addEventListener('input',function(){
+  document.getElementById('prev-email').textContent=this.value||'your-email@thomasmore.be';
 });
-
+document.getElementById('rm-time').addEventListener('input',function(){
+  document.getElementById('prev-time').textContent=this.value;
+});
 document.getElementById('rm-lang').addEventListener('change',function(){
-  document.getElementById('rm-lang-preview').textContent=this.value;
+  document.getElementById('prev-lang').textContent=this.value;
+  document.getElementById('prev-lang2').textContent=this.value;
+});
+document.getElementById('rm-len').addEventListener('change',function(){
+  document.getElementById('prev-len').textContent=this.options[this.selectedIndex].text.split('(')[0].trim();
 });
 
 function saveReminder(){
   const email=document.getElementById('rm-email').value.trim();
-  if(!email){alert('Please enter your email address.');return;}
-  const days=[...document.querySelectorAll('.day-pill.sel')].map(x=>x.dataset.day);
-  if(!days.length){alert('Please select at least one study day.');return;}
-  document.getElementById('rm-success').style.display='block';
-  setTimeout(()=>document.getElementById('rm-success').style.display='none',4000);
-  addBadge('Reminder set','badge-blue');
+  if(!email){toast('⚠️ Enter your email first');return;}
+  const days=[...document.querySelectorAll('.dpill.sel')].map(x=>x.dataset.day);
+  if(!days.length){toast('⚠️ Select at least one study day');return;}
+  document.getElementById('rm-ok').style.display='block';
+  addBadge('badge-sky','🔔 Reminder set');
+  toast('✓ Reminder saved!');
+  setTimeout(()=>document.getElementById('rm-ok').style.display='none',5000);
 }
+
+// ── INIT ──
+document.getElementById('tr-dir').options[0].text='English → French';
+document.getElementById('tr-dir').options[1].text='French → English';
+renderLessons();
+renderProgress();
 </script>
+</body>
+</html>
